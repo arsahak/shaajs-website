@@ -1,0 +1,45 @@
+import { PackageSearch } from "lucide-react";
+import type { Metadata } from "next";
+import { auth } from "@/auth";
+import { getDictionary } from "@/app/dictionaries";
+import { PageHero } from "@/component/common/PageHero";
+import { TrackOrderContent } from "@/component/orders/TrackOrderContent";
+
+type Props = {
+  searchParams: Promise<{ id?: string }>;
+};
+
+const DESCRIPTION =
+  "Enter your order number to see the latest status of your BongoOcean order.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary();
+
+  return {
+    title: dict.topbar.track_order,
+    description: DESCRIPTION,
+    alternates: { canonical: "/orders/track" },
+  };
+}
+
+export default async function TrackOrderPage({ searchParams }: Props) {
+  const dict = await getDictionary();
+  const { id } = await searchParams;
+  const session = await auth();
+
+  return (
+    <>
+      <PageHero
+        title={dict.topbar.track_order}
+        homeLabel={dict.nav.home}
+        icon={PackageSearch}
+        subtitle={DESCRIPTION}
+      />
+      <TrackOrderContent
+        dict={dict}
+        isSignedIn={Boolean(session?.user)}
+        initialOrderNumber={typeof id === "string" ? id : undefined}
+      />
+    </>
+  );
+}
