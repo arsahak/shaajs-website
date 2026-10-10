@@ -8,9 +8,33 @@ import { Audiowide, DM_Sans, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { getDictionary } from "./dictionaries";
 import "./globals.css";
 
-const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.shaajs.com"
-).replace(/\/+$/, "");
+/**
+ * The address this site is reached at — what canonical links and social-share
+ * tags (og:url, og:image) are built from. In order:
+ *
+ * 1. NEXT_PUBLIC_SITE_URL, when it is set to a real address.
+ * 2. On Vercel, the project's own domain: https://shaajs-website.vercel.app
+ *    today, and the custom domain automatically once one is connected.
+ * 3. https://www.shaajs.com.
+ *
+ * A localhost value is ignored on Vercel: left over from a local .env, it
+ * would make every shared link point its picture at the visitor's own machine.
+ */
+function resolveSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const onVercel = Boolean(process.env.VERCEL);
+  const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(
+    configured ?? "",
+  );
+  if (configured && !(onVercel && isLocal)) return configured;
+
+  const vercelDomain = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelDomain) return `https://${vercelDomain}`;
+
+  return "https://www.shaajs.com";
+}
+
+const SITE_URL = resolveSiteUrl().replace(/\/+$/, "");
 const SITE_NAME = "Shaajs";
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
