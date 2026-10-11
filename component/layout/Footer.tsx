@@ -121,7 +121,7 @@ const Footer = ({ dict }: FooterProps) => {
             className="inline-flex items-center transition-opacity hover:opacity-85"
             aria-label="Shaajs home"
           >
-            <Logo className="text-3xl text-(--color-primary) sm:text-[2rem]" />
+            <Logo className="h-9 sm:h-10" />
           </Link>
           <p className="mt-4 text-sm font-semibold text-(--color-dark)">
             {dict.footer.tagline}

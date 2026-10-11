@@ -151,7 +151,7 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
           className="flex shrink-0 items-center transition-opacity hover:opacity-85"
           aria-label="Shaajs home"
         >
-          <Logo tone="white" className="text-2xl text-white sm:text-[1.75rem]" />
+          <Logo tone="white" className="h-8 sm:h-9" />
         </Link>
 
         <BrandMenu
@@ -378,7 +378,7 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
             className="flex items-center transition-opacity hover:opacity-85"
             aria-label="Shaajs home"
           >
-            <Logo className="text-2xl text-(--color-primary)" />
+            <Logo className="h-8" />
           </Link>
           <button
             type="button"

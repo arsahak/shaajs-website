@@ -4,7 +4,7 @@ import { ThemeScript } from "@/component/providers/ThemeScript";
 import { ToastProvider } from "@/component/providers/ToastProvider";
 import { WishlistProvider } from "@/component/providers/WishlistProvider";
 import type { Metadata } from "next";
-import { Audiowide, DM_Sans, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { DM_Sans, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { getDictionary } from "./dictionaries";
 import "./globals.css";
 
@@ -54,14 +54,6 @@ const dmSans = DM_Sans({
   variable: "--font-dm",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-// The SHAAJS wordmark (component/common/Logo.tsx). Audiowide ships one weight.
-const audiowide = Audiowide({
-  variable: "--font-audiowide",
-  subsets: ["latin"],
-  weight: "400",
   display: "swap",
 });
 
@@ -117,7 +109,7 @@ export default async function RootLayout({
       // it off while changing page, so a new page opens at the very top
       // instead of sliding its heading under the sticky navbar.
       data-scroll-behavior="smooth"
-      className={`${jakarta.variable} ${inter.variable} ${dmSans.variable} ${audiowide.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${inter.variable} ${dmSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

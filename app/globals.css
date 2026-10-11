@@ -64,7 +64,6 @@
   --font-body:    var(--font-inter),   'Inter',             sans-serif;
   --font-alt:     var(--font-dm),      'DM Sans',           sans-serif;
   --font-mono:    var(--font-geist-mono), 'Roboto Mono',    monospace;
-  --font-logo:    var(--font-audiowide), 'Audiowide',      sans-serif;
 
   /* Radius */
   --radius-xs:   2px;
