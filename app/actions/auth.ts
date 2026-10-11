@@ -326,6 +326,85 @@ export async function resetPasswordAction(input: {
   }
 }
 
+// ── Sign in with a code ───────────────────────────────────────────────────────
+// The sign-in the storefront uses: no password. Two steps, mirroring the
+// backend: ask for a code by email or phone, then sign in with it. An email or
+// phone with no account yet gets one on the second step. See OtpSignIn.
+
+export type SigninOtpRequestResult =
+  | { ok: true; identifier: string; channel: "email" | "phone" }
+  | { ok: false; error: string };
+
+// Codes set by CustomerSigninError in auth.ts, from the backend's response.
+const SIGNIN_OTP_ERROR_MESSAGES: Record<string, string> = {
+  otp_incorrect: "Incorrect code. Please try again.",
+  otp_expired: "This code has expired. Please request a new one.",
+  otp_too_many_attempts:
+    "Too many incorrect attempts. Please request a new code.",
+  otp_not_requested: "Please request a new code.",
+  account_inactive: "Your account is inactive. Please contact support.",
+  not_a_customer: "This email or phone number can't be used to sign in here.",
+};
+
+// Step 1 — also used to resend the code (the backend allows one per minute).
+export async function requestSigninOtpAction(
+  rawIdentifier: string,
+): Promise<SigninOtpRequestResult> {
+  const identifier = rawIdentifier.trim();
+  if (!identifier) {
+    return { ok: false, error: "Please enter your email or phone number." };
+  }
+
+  const result = await postAuth(
+    "signin/request-otp",
+    { identifier },
+    "Could not send the code. Please try again.",
+  );
+  if (!result.ok) return result;
+
+  return {
+    ok: true,
+    // The backend's normalized form — step 2 must use the same value.
+    identifier:
+      typeof result.data.identifier === "string"
+        ? result.data.identifier
+        : identifier,
+    channel: result.data.channel === "phone" ? "phone" : "email",
+  };
+}
+
+// Step 2 — goes through the "customer-otp" provider registered in auth.ts,
+// which checks the code with the backend and starts the session.
+export async function verifySigninOtpAction(input: {
+  identifier: string;
+  otp: string;
+  callbackUrl?: string;
+}): Promise<SigninResult> {
+  const identifier = input.identifier.trim();
+  const otp = input.otp.trim();
+  const callbackUrl = safeCallbackUrl(input.callbackUrl, "/");
+
+  if (!identifier || !otp) {
+    return { ok: false, error: "Please enter the code we sent you." };
+  }
+
+  try {
+    await signIn("customer-otp", { identifier, otp, redirect: false });
+    return { ok: true, redirectTo: callbackUrl };
+  } catch (error) {
+    if (isCredentialsError(error)) {
+      const code = (error as { code?: string }).code ?? "";
+      return {
+        ok: false,
+        error:
+          SIGNIN_OTP_ERROR_MESSAGES[code] ??
+          "Could not verify the code. Please try again.",
+      };
+    }
+    return { ok: false, error: "An error occurred. Please try again." };
+  }
+}
+
 // ── Staff auth (manager, admin, superadmin) ────────────────────────────────────
 // Goes through the "admin-credentials" provider registered in auth.ts, which
 // calls the backend's /api/v1/auth/staff/signin (rejects customer accounts).

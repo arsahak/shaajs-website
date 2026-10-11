@@ -75,15 +75,15 @@ export function AboutContent() {
               A World of Products, All in One Place.
             </h2>
             <p className="mt-4 text-(--color-text-muted)">
-              BongoOcean is an online marketplace made for Bangladesh. We
-              started with a simple idea: ordering online should feel as easy
-              and as safe as buying from the shop next door — wherever in the
-              country you live.
+              Shaajs is an online marketplace made for Bangladesh. We started
+              with a simple idea: ordering online should feel as easy and as
+              safe as buying from the shop next door — wherever in the country
+              you live.
             </p>
             <p className="mt-3 text-(--color-text-muted)">
               So we bring trusted sellers, honest prices in Taka, cash on
-              delivery and nationwide shipping together in one place —
-              delivered to your address in any of the eight divisions.
+              delivery and nationwide shipping together in one place — delivered
+              to your address in any of the eight divisions.
             </p>
           </FadeIn>
 
@@ -108,13 +108,13 @@ export function AboutContent() {
       <Section
         tone="surface"
         title="What we stand for"
-        subtitle="Four promises behind every order placed on BongoOcean."
+        subtitle="Four promises behind every order placed on Shaajs."
       >
         <FeatureGrid items={values} columns={4} muted />
       </Section>
 
       <Section
-        title="How BongoOcean works"
+        title="How Shaajs works"
         subtitle="From the first search to the knock on your door."
       >
         <StepList steps={steps} />
@@ -124,7 +124,7 @@ export function AboutContent() {
         title="Ready to explore?"
         description="Discover products from trusted sellers, or open your own store and reach shoppers all over Bangladesh."
         primary={{ label: "Shop all products", href: "/product" }}
-        secondary={{ label: "Sell on BongoOcean", href: "/sell" }}
+        secondary={{ label: "Sell on Shaajs", href: "/sell" }}
       />
     </>
   );

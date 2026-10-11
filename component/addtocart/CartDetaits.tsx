@@ -2,7 +2,6 @@
 
 import type { Dictionary } from "@/app/dictionaries";
 import { colorSwatches } from "@/app/data/products";
-import { useAuthModal } from "@/component/providers/AuthModalProvider";
 import { cartLineKey, useCart } from "@/component/providers/CartProvider";
 import { formatPrice } from "@/app/utils/format-price";
 import {
@@ -20,18 +19,10 @@ import Link from "next/link";
 
 interface CartDetaitsProps {
   dict: Dictionary;
-  isSignedIn: boolean;
 }
 
-const CartDetaits = ({ dict, isSignedIn }: CartDetaitsProps) => {
+const CartDetaits = ({ dict }: CartDetaitsProps) => {
   const { items, count, subtotal, removeItem, updateQty } = useCart();
-  const { openAuth } = useAuthModal();
-
-  // The checkout page also redirects signed-out visitors, but sending them
-  // straight to sign-in (with a way back) saves a hop.
-  const checkoutHref = isSignedIn
-    ? "/checkout"
-    : `/sign-in?callbackUrl=${encodeURIComponent("/checkout")}`;
 
   if (items.length === 0) {
     return (
@@ -179,13 +170,8 @@ const CartDetaits = ({ dict, isSignedIn }: CartDetaitsProps) => {
 
         <div className="flex flex-col gap-2.5 pt-1">
           <Link
-            href={checkoutHref}
-            // Signed out: sign in over the cart, then carry on to checkout.
-            onClick={(event) => {
-              if (isSignedIn) return;
-              event.preventDefault();
-              openAuth("sign-in", { callbackUrl: "/checkout" });
-            }}
+            // No sign-in first — checkout verifies a newcomer by OTP itself.
+            href="/checkout"
             className="group flex h-12 w-full items-center justify-center gap-2 rounded-full bg-(--color-primary) px-5 text-sm font-semibold text-white shadow-lg shadow-(--color-primary)/30 transition-all hover:-translate-y-0.5 hover:bg-(--color-primary-dark) hover:shadow-xl hover:shadow-(--color-primary)/35"
           >
             <LockKeyhole size={16} />

@@ -1,3 +1,5 @@
+import type { Dictionary } from "@/app/dictionaries";
+import { FadeIn } from "@/component/motion/FadeIn";
 import {
   ArrowRight,
   Globe,
@@ -11,8 +13,6 @@ import {
   Watch,
 } from "lucide-react";
 import Link from "next/link";
-import type { Dictionary } from "@/app/dictionaries";
-import { FadeIn } from "@/component/motion/FadeIn";
 
 interface SellerBannerProps {
   dict: Dictionary;
@@ -51,7 +51,7 @@ export function SellerBanner({ dict }: SellerBannerProps) {
             <div className="text-start">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
                 <Store aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                {dict.topbar.sell_on_bongoocean}
+                {dict.topbar.sell_on_Shaajs}
               </span>
 
               <h2 className="mt-4 text-3xl leading-tight text-white sm:text-4xl lg:text-[2.75rem]">

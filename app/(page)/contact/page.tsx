@@ -1,17 +1,17 @@
-import { Mail } from "lucide-react";
-import type { Metadata } from "next";
-import { auth } from "@/auth";
 import { isContactTopic } from "@/app/data/contact";
 import { getDictionary } from "@/app/dictionaries";
+import { auth } from "@/auth";
 import { PageHero } from "@/component/common/PageHero";
 import { ContactContent } from "@/component/contact/ContactContent";
+import { Mail } from "lucide-react";
+import type { Metadata } from "next";
 
 type Props = {
   searchParams: Promise<{ topic?: string }>;
 };
 
 const DESCRIPTION =
-  "Get in touch with BongoOcean support or our seller team — we are here 24/7.";
+  "Get in touch with Shaajs support or our seller team — we are here 24/7.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();

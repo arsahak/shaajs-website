@@ -3,8 +3,7 @@ import type { Dictionary } from "@/app/dictionaries";
 import {
   FacebookIcon,
   InstagramIcon,
-  LinkedinIcon,
-  XIcon,
+  TikTokIcon,
   YoutubeIcon,
 } from "@/component/icons/SocialIcons";
 import { Banknote, ShieldCheck } from "lucide-react";
@@ -47,7 +46,7 @@ const Footer = ({ dict }: FooterProps) => {
     { label: dict.footer.about, href: "/about" },
     { label: dict.footer.careers, href: "/careers" },
     { label: dict.footer.blog, href: "/blog" },
-    { label: dict.topbar.sell_on_bongoocean, href: "/sell" },
+    { label: dict.topbar.sell_on_Shaajs, href: "/sell" },
     { label: dict.footer.contact, href: "/contact" },
   ];
 
@@ -75,24 +74,24 @@ const Footer = ({ dict }: FooterProps) => {
   const socialLinks = [
     {
       label: "Facebook",
-      href: "https://facebook.com/bongoocean",
+      href: "https://facebook.com/shaajsbd",
       Icon: FacebookIcon,
     },
     {
       label: "Instagram",
-      href: "https://instagram.com/bongoocean",
+      href: "https://instagram.com/shaajsbd",
       Icon: InstagramIcon,
     },
-    { label: "X (Twitter)", href: "https://x.com/bongoocean", Icon: XIcon },
+    // { label: "X (Twitter)", href: "https://x.com/shaajs", Icon: XIcon },
     {
-      label: "YouTube",
-      href: "https://youtube.com/@bongoocean",
-      Icon: YoutubeIcon,
+      label: "TikTok",
+      href: "https://www.tiktok.com/@shaajsbd",
+      Icon: TikTokIcon,
     },
     {
-      label: "LinkedIn",
-      href: "https://linkedin.com/company/bongoocean",
-      Icon: LinkedinIcon,
+      label: "YouTube",
+      href: "https://youtube.com/@shaajs",
+      Icon: YoutubeIcon,
     },
   ];
 
@@ -228,7 +227,7 @@ const Footer = ({ dict }: FooterProps) => {
       <div className="border-t border-(--color-border) bg-(--color-bg)">
         <div className="container flex flex-col items-center justify-between gap-4 py-5 text-sm text-(--color-text-muted) sm:flex-row sm:flex-wrap">
           <p>
-            © {year} BongoOcean. {dict.footer.copyright}
+            © {year} Shaajs. {dict.footer.copyright}
           </p>
           <div className="flex items-center gap-5">
             {legalLinks.map((link) => (

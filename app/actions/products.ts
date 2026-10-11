@@ -10,7 +10,7 @@ import {
 
 const API = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/v1`;
 
-// ── Bongoocean product catalog (public, paginated) ──────────────────────────
+// ── Shaajs product catalog (public, paginated) ──────────────────────────
 // Separate from the 1688 sourcing search below — this hits the backend's own
 // Product catalog (GET /products, no auth required).
 
@@ -297,9 +297,7 @@ export async function listProductReviewsAction(
 // function (not a re-export) since "use server" files may only export async
 // functions.
 
-export async function search1688Action(
-  params: Search1688Params,
-): Promise<{
+export async function search1688Action(params: Search1688Params): Promise<{
   ok: boolean;
   data?: SourcingSearchResult | null;
   error?: string;

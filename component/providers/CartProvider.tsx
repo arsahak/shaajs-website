@@ -21,7 +21,9 @@ export interface CartItem extends CartProductSnapshot {
  * Identifies one cart line. The same product in a different color or size is
  * a separate line; for a product without variations this is just its id.
  */
-export function cartLineKey(item: Pick<Product, "id" | "color" | "size">): string {
+export function cartLineKey(
+  item: Pick<Product, "id" | "color" | "size">,
+): string {
   return item.color || item.size
     ? `${item.id}|${item.color ?? ""}|${item.size ?? ""}`
     : item.id;
@@ -38,7 +40,7 @@ interface CartContextValue {
   clear: () => void;
 }
 
-const STORAGE_KEY = "bongoocean-cart";
+const STORAGE_KEY = "Shaajs-cart";
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 

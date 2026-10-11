@@ -1,7 +1,7 @@
 const THEME_SCRIPT = `
 (function () {
   try {
-    var stored = localStorage.getItem("bongoocean-theme");
+    var stored = localStorage.getItem("Shaajs-theme");
     var isDark =
       stored === "dark" ||
       (stored === "system" &&

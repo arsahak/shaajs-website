@@ -5,7 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 type FlashToast = { type: "success" | "error"; message: string };
 
-const FLASH_KEY = "bongoocean-flash-toast";
+const FLASH_KEY = "Shaajs-flash-toast";
 
 /**
  * Queue a toast to show after the next full page load. Use it right before a

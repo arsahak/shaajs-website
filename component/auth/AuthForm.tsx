@@ -53,8 +53,6 @@ interface AuthFormProps {
    * the form's links navigate instead.
    */
   onSwitchView?: (view: AuthView, options?: { identifier?: string }) => void;
-  /** Inside the sign-in modal: closes it. */
-  onClose?: () => void;
 }
 
 export const supplementalCopy = {
@@ -97,7 +95,6 @@ export function AuthForm({
   dict,
   callbackUrl: callbackUrlProp,
   onSwitchView,
-  onClose,
 }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -199,9 +196,9 @@ export function AuthForm({
 
   const showOtpStep = isSignUp && otpStep;
   // Signing in asks for a phone number or an email and a one-time code — no
-  // password. That flow is its own component (OtpSignIn), a demo for now, so
-  // the details form below is only shown for sign-up; its sign-in parts
-  // (password, "Forgot password?", "Remember me") are not reached at present.
+  // password. That flow is its own component (OtpSignIn), so the details form
+  // below is only shown for sign-up; its sign-in parts (password, "Forgot
+  // password?", "Remember me") are not reached at present.
   const codeSignIn = !isSignUp;
   const codeCopy = otpSignInCopy;
   const signupError = !signupState.ok ? signupState.error : undefined;
@@ -258,9 +255,7 @@ export function AuthForm({
               ? dict.auth.sign_up_title
               : codeSignIn && codeStep === "otp"
                 ? codeCopy.otpTitle
-                : codeSignIn && codeStep === "done"
-                  ? codeCopy[method].doneTitle
-                  : dict.auth.sign_in_title}
+                : dict.auth.sign_in_title}
         </h1>
         <p className="mt-2.5 text-center text-[0.9375rem] leading-6 text-(--color-text-muted)">
           {showOtpStep ? (
@@ -284,8 +279,6 @@ export function AuthForm({
                 {codeSentTo}
               </span>
             </>
-          ) : codeSignIn && codeStep === "done" ? (
-            codeCopy.doneSubtitle
           ) : (
             dict.auth.sign_in_subtitle
           )}
@@ -392,7 +385,7 @@ export function AuthForm({
               setCodeStep(step);
               if (sentTo) setCodeSentTo(sentTo);
             }}
-            onDone={onClose}
+            callbackUrl={callbackUrl}
           />
         </div>
       ) : (
@@ -660,7 +653,7 @@ export function AuthForm({
       )}
 
       {/* Other ways in. The first button switches between phone and email;
-          Facebook is design only for now and just says so. */}
+          Facebook sign-in isn't available yet and just says so. */}
       {!showOtpStep && !(codeSignIn && codeStep !== "contact") && (
         <div className="mt-7">
           <div className="flex items-center gap-3 text-xs font-medium text-(--color-text-light) uppercase">

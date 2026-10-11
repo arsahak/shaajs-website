@@ -97,8 +97,7 @@ export function ProductDetailInfo({
   };
 
   // Buy Now puts exactly the chosen quantity in the cart (without stacking on
-  // top of an earlier add) and goes straight to checkout — which itself sends
-  // signed-out visitors to sign-in and back.
+  // top of an earlier add) and goes straight to checkout, signed in or not.
   const handleBuyNow = () => {
     if (!choiceComplete()) return;
     const lineKey = cartLineKey(cartProduct);

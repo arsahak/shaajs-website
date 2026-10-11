@@ -1,12 +1,10 @@
 import { ChevronRight, ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { auth } from "@/auth";
 import { getDictionary } from "@/app/dictionaries";
 import CartDetaits from "@/component/addtocart/CartDetaits";
 
 export default async function CartPage() {
   const dict = await getDictionary();
-  const session = await auth();
 
   return (
     <div className="container py-8">
@@ -38,7 +36,7 @@ export default async function CartPage() {
       </div>
 
       <div className="mt-6">
-        <CartDetaits dict={dict} isSignedIn={Boolean(session?.user)} />
+        <CartDetaits dict={dict} />
       </div>
     </div>
   );

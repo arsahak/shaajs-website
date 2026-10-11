@@ -6,7 +6,13 @@ export type CustomerSigninErrorCode =
   | "account_not_found"
   | "wrong_password"
   | "account_inactive"
-  | "invalid_credentials";
+  | "invalid_credentials"
+  // Sign in with a code (the "customer-otp" provider).
+  | "otp_incorrect"
+  | "otp_expired"
+  | "otp_too_many_attempts"
+  | "otp_not_requested"
+  | "not_a_customer";
 
 // Auth.js only lets a CredentialsSignin subclass through from authorize();
 // any other error is wrapped and loses its detail.
@@ -189,6 +195,136 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         } catch (error) {
           if (error instanceof CustomerSigninError) throw error;
           console.error("Customer authorize function crashed:", error);
+          return null;
+        }
+      },
+    }),
+
+    // Customer sign-in with a one-time code instead of a password — the code
+    // was sent by requestSigninOtpAction. Hits the backend's
+    // /api/v1/auth/signin/verify-otp, which also creates the customer account
+    // when the email/phone has none yet.
+    Credentials({
+      id: "customer-otp",
+      name: "Customer code",
+      credentials: {
+        identifier: { label: "Email or phone", type: "text" },
+        otp: { label: "Code", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.identifier || !credentials?.otp) return null;
+
+        try {
+          const res = await fetch(
+            `${BACKEND_URL}/api/v1/auth/signin/verify-otp`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                identifier: credentials.identifier,
+                otp: credentials.otp,
+              }),
+              cache: "no-store",
+              signal: AbortSignal.timeout(8000),
+            },
+          );
+
+          if (!res.ok) {
+            // Expected rejections carry a reason the form can show (see
+            // verifySigninOtpAction). Anything else stays generic.
+            const body = await res.json().catch(() => null);
+            const message = typeof body?.message === "string" ? body.message : "";
+            if (res.status === 429) {
+              throw new CustomerSigninError("otp_too_many_attempts");
+            }
+            if (res.status === 403) {
+              throw new CustomerSigninError(
+                message.includes("inactive") ? "account_inactive" : "not_a_customer",
+              );
+            }
+            if (res.status === 400) {
+              throw new CustomerSigninError(
+                message.startsWith("Incorrect")
+                  ? "otp_incorrect"
+                  : message.includes("expired")
+                    ? "otp_expired"
+                    : "otp_not_requested",
+              );
+            }
+            if (res.status === 422) throw new CustomerSigninError("otp_incorrect");
+
+            console.error(
+              "Customer code sign-in failed with status:",
+              res.status,
+              body,
+            );
+            return null;
+          }
+
+          const body = await res.json();
+          const user = body?.data?.user;
+          const token = body?.data?.token;
+
+          if (!token || !user?._id) {
+            console.error(
+              "Customer code sign-in response is missing fields:",
+              body,
+            );
+            return null;
+          }
+
+          return {
+            id: user._id,
+            email: user.email ?? null,
+            name: `${user.firstName} ${user.lastName}`.trim(),
+            accessToken: token,
+            role: user.role,
+            userType: "customer",
+          };
+        } catch (error) {
+          if (error instanceof CustomerSigninError) throw error;
+          console.error("Customer code authorize function crashed:", error);
+          return null;
+        }
+      },
+    }),
+
+    // Starts a customer session from an access token the backend has just
+    // issued — the checkout that verifies a code and places the order in one
+    // call gets one back (see verifyAndPlaceOrderAction). The token is
+    // checked with the backend's /api/v1/users/me, never taken on trust.
+    Credentials({
+      id: "customer-token",
+      name: "Customer token",
+      credentials: {
+        token: { label: "Token", type: "text" },
+      },
+      async authorize(credentials) {
+        const token = credentials?.token;
+        if (typeof token !== "string" || !token) return null;
+
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: "no-store",
+            signal: AbortSignal.timeout(8000),
+          });
+          if (!res.ok) return null;
+
+          const body = await res.json();
+          const user = body?.data;
+          if (!user?._id || user.role !== "customer") return null;
+
+          return {
+            id: user._id,
+            email: user.email ?? null,
+            name: `${user.firstName} ${user.lastName}`.trim(),
+            accessToken: token,
+            role: user.role,
+            userType: "customer",
+          };
+        } catch (error) {
+          console.error("Customer token authorize function crashed:", error);
           return null;
         }
       },

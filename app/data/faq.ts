@@ -1,4 +1,4 @@
-import { insideDhaka, outsideDhaka, formatTaka } from "./delivery";
+import { formatTaka, insideDhaka, outsideDhaka } from "./delivery";
 
 export interface FaqItem {
   question: string;
@@ -39,7 +39,7 @@ export const faqCategories: FaqCategory[] = [
       {
         question: "Are prices in Bangladeshi Taka?",
         answer:
-          "Yes. Every price and delivery fee on BongoOcean is shown in Bangladeshi Taka (৳), and that is exactly the amount you pay — there are no conversion charges.",
+          "Yes. Every price and delivery fee on Shaajs is shown in Bangladeshi Taka (৳), and that is exactly the amount you pay — there are no conversion charges.",
       },
     ],
   },
@@ -54,13 +54,11 @@ export const faqCategories: FaqCategory[] = [
       },
       {
         question: "How long does delivery take?",
-        answer:
-          `Usually ${insideDhaka.days} working days inside Dhaka and ${outsideDhaka.days} working days for the rest of the country. Public holidays, bad weather and remote locations can add a little time.`,
+        answer: `Usually ${insideDhaka.days} working days inside Dhaka and ${outsideDhaka.days} working days for the rest of the country. Public holidays, bad weather and remote locations can add a little time.`,
       },
       {
         question: "How much is the delivery fee?",
-        answer:
-          `${formatTaka(insideDhaka.fee)} inside Dhaka and ${formatTaka(outsideDhaka.fee)} everywhere else in Bangladesh. The fee is shown in the order summary at checkout before you confirm.`,
+        answer: `${formatTaka(insideDhaka.fee)} inside Dhaka and ${formatTaka(outsideDhaka.fee)} everywhere else in Bangladesh. The fee is shown in the order summary at checkout before you confirm.`,
       },
       {
         question: "How do I track my order?",
@@ -118,17 +116,17 @@ export const faqCategories: FaqCategory[] = [
   },
   {
     id: "selling",
-    title: "Selling on BongoOcean",
+    title: "Selling on Shaajs",
     items: [
       {
-        question: "Who can sell on BongoOcean?",
+        question: "Who can sell on Shaajs?",
         answer:
           "Businesses, manufacturers, wholesalers and brand owners in Bangladesh with genuine products. Every seller is reviewed before their store goes live.",
       },
       {
         question: "How do I become a seller?",
         answer:
-          "Send us your business details from the Sell on BongoOcean page. Our seller team reviews the application and helps you set up your store.",
+          "Send us your business details from the Sell on Shaajs page. Our seller team reviews the application and helps you set up your store.",
       },
       {
         question: "What can I not sell?",

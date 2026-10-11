@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getMyOrdersAction } from "@/app/actions/order";
 import { getDictionary } from "@/app/dictionaries";
+import { AccountShell } from "@/component/customr_account/AccountShell";
 import OrderList from "@/component/customr_account/OrderList";
 
 export default async function OrdersPage({
@@ -51,7 +52,7 @@ export default async function OrdersPage({
         />
       </div>
 
-      <div className="mt-6">
+      <AccountShell dict={dict} className="mt-6">
         {result.ok ? (
           <OrderList
             dict={dict}
@@ -67,7 +68,7 @@ export default async function OrdersPage({
             {dict.orders.load_error}
           </p>
         )}
-      </div>
+      </AccountShell>
     </div>
   );
 }

@@ -25,7 +25,7 @@ const Topbar = ({ dict }: TopbarProps) => {
             className="hidden items-center gap-1.5 text-white/80 transition-colors hover:text-white lg:flex"
           >
             <Store size={14} />
-            {dict.topbar.sell_on_bongoocean}
+            {dict.topbar.sell_on_Shaajs}
           </Link>
           <Link
             href="/help"

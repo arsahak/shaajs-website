@@ -31,7 +31,7 @@ export interface FaqPageCopy {
 
 const helpEn: HelpCopy = {
   description:
-    "Find answers about orders, delivery, returns and your BongoOcean account.",
+    "Find answers about orders, delivery, returns and your Shaajs account.",
   topics: {
     title: "How can we help?",
     subtitle: "Pick a topic to find the answer you need.",
@@ -53,7 +53,7 @@ const helpEn: HelpCopy = {
         description: "Update your profile, address and settings.",
       },
       {
-        title: "Selling on BongoOcean",
+        title: "Selling on Shaajs",
         description: "Open a store and reach buyers across Bangladesh.",
       },
       {
@@ -77,7 +77,7 @@ const helpEn: HelpCopy = {
 
 const faqPageEn: FaqPageCopy = {
   description:
-    "Answers to the most common questions about shopping and selling on BongoOcean.",
+    "Answers to the most common questions about shopping and selling on Shaajs.",
   topicsLabel: "Topics",
   cta: {
     title: "Did not find your answer?",

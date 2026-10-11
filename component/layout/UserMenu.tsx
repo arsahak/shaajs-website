@@ -74,14 +74,14 @@ export function UserMenu({ user, dict, className = "" }: UserMenuProps) {
             )}
           </div>
         )}
-        {/* <Link
+        <Link
           href="/account"
           onClick={() => setOpen(false)}
           className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors hover:bg-(--color-bg)"
         >
           <User size={15} />
           {dict.nav.profile}
-        </Link> */}
+        </Link>
         <Link
           href="/orders"
           onClick={() => setOpen(false)}
@@ -90,19 +90,21 @@ export function UserMenu({ user, dict, className = "" }: UserMenuProps) {
           <Package size={15} />
           {dict.nav.orders}
         </Link>
-        {/* <Link
+        <Link
           href="/account/settings"
           onClick={() => setOpen(false)}
           className="flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors hover:bg-(--color-bg)"
         >
           <Settings size={15} />
           {dict.nav.settings}
-        </Link> */}
+        </Link>
         <div className="my-1 border-t border-(--color-border)" />
         <form action={signoutAction}>
           <button
             type="submit"
-            className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-start text-sm text-(--color-error) transition-colors hover:bg-(--color-bg)"
+            // Buttons are centred and semi-bold site-wide; this one lines up
+            // with the links above it instead.
+            className="flex w-full items-center justify-start gap-2.5 rounded-none px-3.5 py-2.5 text-start text-sm font-normal text-(--color-error) transition-colors hover:bg-(--color-bg)"
           >
             <LogOut size={15} />
             {dict.nav.sign_out}

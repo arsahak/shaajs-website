@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/auth";
+import { auth, signIn } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { getCatalogProductAction } from "./products";
 
@@ -61,10 +61,11 @@ export interface OrderPagination {
 
 export interface PlaceOrderInput {
   customerName: string;
-  customerPhone: string;
+  /** At least one of phone and email — the customer picks how to be reached. */
+  customerPhone?: string;
   customerEmail?: string;
   shippingAddress: {
-    division: string;
+    division?: string;
     district?: string;
     upazila?: string;
     postOffice?: string;
@@ -83,11 +84,15 @@ export interface PlaceOrderInput {
     size?: string;
   }[];
   notes?: string;
+  /** A coupon the customer applied; the backend checks it again. */
+  couponCode?: string;
 }
 
 export type PlaceOrderResult =
   | { ok: true; order: Order }
-  | { ok: false; error: string };
+  // `needsSignIn`: nobody is signed in (or the saved session is no longer
+  // accepted) — the checkout then verifies the customer by OTP and retries.
+  | { ok: false; error: string; needsSignIn?: true };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -112,12 +117,13 @@ function normalizePhone(phone: string): string {
 
 // ── Place order ──────────────────────────────────────────────────────────────
 
-export async function placeOrderAction(
+// What the backend's order endpoints take. Shared by the signed-in order and
+// by the verify-and-order of a newcomer, so both send exactly the same thing.
+async function buildOrderPayload(
   input: PlaceOrderInput,
-): Promise<PlaceOrderResult> {
-  const token = await getAccessToken();
-  if (!token) return { ok: false, error: "Please sign in to place your order." };
-
+): Promise<
+  { ok: true; payload: Record<string, unknown> } | { ok: false; error: string }
+> {
   if (input.items.length === 0) {
     return { ok: false, error: "Your cart is empty." };
   }
@@ -154,10 +160,49 @@ export async function placeOrderAction(
     return { ok: false, error: "You can order at most 99 of each product." };
   }
 
-  const phone = normalizePhone(input.customerPhone);
-  if (!/^[+]?[0-9]{7,15}$/.test(phone)) {
+  const phone = normalizePhone(input.customerPhone ?? "");
+  const email = input.customerEmail?.trim() ?? "";
+  if (!phone && !email) {
+    return { ok: false, error: "Please enter a phone number or an email." };
+  }
+  if (phone && !/^[+]?[0-9]{7,15}$/.test(phone)) {
     return { ok: false, error: "Please enter a valid phone number." };
   }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: "Please enter a valid email address." };
+  }
+
+  return {
+    ok: true,
+    payload: {
+      customerName: input.customerName.trim(),
+      customerPhone: phone || undefined,
+      customerEmail: email || undefined,
+      shippingAddress: input.shippingAddress,
+      items,
+      // Customers can only pay cash on delivery for now (backend enforces).
+      paymentMethod: "cod",
+      notes: input.notes?.trim() || undefined,
+      couponCode: input.couponCode?.trim() || undefined,
+    },
+  };
+}
+
+/** Places the order of a customer who is already signed in. */
+export async function placeOrderAction(
+  input: PlaceOrderInput,
+): Promise<PlaceOrderResult> {
+  const token = await getAccessToken();
+  if (!token) {
+    return {
+      ok: false,
+      error: "Please verify your phone or email to place the order.",
+      needsSignIn: true,
+    };
+  }
+
+  const built = await buildOrderPayload(input);
+  if (!built.ok) return built;
 
   try {
     const res = await fetch(`${API}/orders`, {
@@ -166,19 +211,20 @@ export async function placeOrderAction(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        customerName: input.customerName.trim(),
-        customerPhone: phone,
-        customerEmail: input.customerEmail?.trim() || undefined,
-        shippingAddress: input.shippingAddress,
-        items,
-        // Customers can only pay cash on delivery for now (backend enforces).
-        paymentMethod: "cod",
-        notes: input.notes?.trim() || undefined,
-      }),
+      body: JSON.stringify(built.payload),
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
     });
+
+    // A saved session the backend no longer accepts (expired, or the account
+    // is gone): the checkout verifies the customer again and retries.
+    if (res.status === 401) {
+      return {
+        ok: false,
+        error: "Please verify your phone or email to place the order.",
+        needsSignIn: true,
+      };
+    }
 
     const body = await res.json().catch(() => null);
     if (!res.ok) {
@@ -190,6 +236,99 @@ export async function placeOrderAction(
   } catch {
     return { ok: false, error: "Network error. Please try again." };
   }
+}
+
+export type VerifyAndPlaceOrderResult =
+  | {
+      ok: true;
+      order: Order;
+      /** True when this order created the customer's account. */
+      isNewUser: boolean;
+      /** False only if the order went through but the session couldn't start. */
+      signedIn: boolean;
+    }
+  // `stage` says what was wrong: the code the customer typed, or the order
+  // itself (in which case the same code is still good for another try).
+  | { ok: false; error: string; stage: "code" | "order" };
+
+const CODE_ERROR_MESSAGES: { match: RegExp; message: string }[] = [
+  { match: /^Incorrect/i, message: "Incorrect code. Please try again." },
+  { match: /expired/i, message: "This code has expired. Please request a new one." },
+  { match: /too many/i, message: "Too many incorrect attempts. Please request a new code." },
+];
+
+/**
+ * The checkout of a visitor who isn't signed in, in one step: confirms the
+ * code sent to their phone/email, signs them in — creating their account if
+ * that contact has none — and places the order on it.
+ */
+export async function verifyAndPlaceOrderAction(input: {
+  /** The email/phone the code was sent to, as the backend normalized it. */
+  identifier: string;
+  otp: string;
+  order: PlaceOrderInput;
+}): Promise<VerifyAndPlaceOrderResult> {
+  const built = await buildOrderPayload(input.order);
+  if (!built.ok) return { ...built, stage: "order" };
+
+  let data: { order: Order; token?: string; isNewUser?: boolean };
+  try {
+    const res = await fetch(`${API}/orders/checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...built.payload,
+        identifier: input.identifier.trim(),
+        otp: input.otp.trim(),
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(20000),
+    });
+
+    const body = await res.json().catch(() => null);
+    if (!res.ok || !body?.data?.order) {
+      const raw = errorMessage(body, "Could not place your order.");
+      // The backend answers 400/429 only for the code; anything else is
+      // about the order (422) or the account (403).
+      if (res.status === 400 || res.status === 429) {
+        return {
+          ok: false,
+          stage: "code",
+          error:
+            CODE_ERROR_MESSAGES.find(({ match }) => match.test(raw))?.message ??
+            "Please request a new code.",
+        };
+      }
+      return { ok: false, stage: "order", error: raw };
+    }
+    data = body.data;
+  } catch {
+    return {
+      ok: false,
+      stage: "order",
+      error: "Network error. Please try again.",
+    };
+  }
+
+  // The order exists from here on. Starting the session is the last step —
+  // if it fails the customer still has their order and can sign in later.
+  let signedIn = false;
+  if (data.token) {
+    try {
+      await signIn("customer-token", { token: data.token, redirect: false });
+      signedIn = true;
+    } catch (error) {
+      console.error("Order placed, but the session could not be started:", error);
+    }
+  }
+
+  revalidatePath("/", "layout");
+  return {
+    ok: true,
+    order: data.order,
+    isNewUser: Boolean(data.isNewUser),
+    signedIn,
+  };
 }
 
 // ── Order history ────────────────────────────────────────────────────────────
@@ -257,5 +396,84 @@ export async function getMyOrderAction(
     return { ok: true, order: body.data as Order };
   } catch {
     return { ok: false, reason: "error" };
+  }
+}
+
+/**
+ * Looks up an order without an account — for customers who checked out as
+ * guests. Needs the order number and the phone number or email it was placed
+ * with.
+ */
+export async function trackGuestOrderAction(
+  orderNumber: string,
+  contact: string,
+): Promise<TrackOrderResult> {
+  const number = orderNumber.trim();
+  const isEmail = contact.includes("@");
+  const email = isEmail ? contact.trim().toLowerCase() : "";
+  const phone = isEmail ? "" : normalizePhone(contact);
+  if (!number || (!email && !/^[+]?[0-9]{7,15}$/.test(phone))) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  try {
+    const res = await fetch(`${API}/orders/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderNumber: number,
+        ...(email ? { email } : { phone }),
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+    if (res.status === 404 || res.status === 422) {
+      return { ok: false, reason: "not_found" };
+    }
+
+    const body = await res.json().catch(() => null);
+    if (!res.ok || !body?.data) return { ok: false, reason: "error" };
+    return { ok: true, order: body.data as Order };
+  } catch {
+    return { ok: false, reason: "error" };
+  }
+}
+
+// ── Coupon ───────────────────────────────────────────────────────────────────
+
+export type CouponResult =
+  | { ok: true; code: string; discount: number }
+  | { ok: false; error: string };
+
+/**
+ * The checkout's "Apply" button: what a coupon code takes off products worth
+ * `subtotal`. Nothing is used up — the order itself checks the code again.
+ */
+export async function validateCouponAction(
+  code: string,
+  subtotal: number,
+): Promise<CouponResult> {
+  const trimmed = code.trim();
+  if (!trimmed) return { ok: false, error: "Please enter a coupon code." };
+
+  try {
+    const res = await fetch(`${API}/coupons/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: trimmed, subtotal }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(10000),
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok || !body?.data) {
+      return { ok: false, error: errorMessage(body, "Invalid coupon code.") };
+    }
+    return {
+      ok: true,
+      code: String(body.data.code),
+      discount: Number(body.data.discount) || 0,
+    };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
   }
 }

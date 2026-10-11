@@ -2,7 +2,7 @@ export const CONTACT_TOPICS = [
   { value: "general", label: "General question" },
   { value: "order", label: "Help with an order" },
   { value: "returns", label: "Returns & refunds" },
-  { value: "seller", label: "Selling on BongoOcean" },
+  { value: "seller", label: "Selling on Shaajs" },
   { value: "other", label: "Something else" },
 ] as const;
 

@@ -24,10 +24,7 @@ export function SellContent() {
 
   return (
     <>
-      <Section
-        title={copy.benefits.title}
-        subtitle={copy.benefits.subtitle}
-      >
+      <Section title={copy.benefits.title} subtitle={copy.benefits.subtitle}>
         <FeatureGrid
           items={copy.benefits.items.map((item, i) => ({
             ...item,
@@ -82,7 +79,7 @@ export function SellContent() {
         }}
         secondary={{
           label: copy.cta.secondary,
-          href: "/blog/start-selling-on-bongoocean",
+          href: "/blog/start-selling-on-Shaajs",
         }}
       />
     </>

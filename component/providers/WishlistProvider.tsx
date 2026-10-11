@@ -21,7 +21,7 @@ interface WishlistContextValue {
   removeItem: (id: string) => void;
 }
 
-const STORAGE_KEY = "bongoocean-wishlist";
+const STORAGE_KEY = "Shaajs-wishlist";
 
 const WishlistContext = createContext<WishlistContextValue | undefined>(
   undefined,

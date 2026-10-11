@@ -1,11 +1,11 @@
+import { getDictionary } from "@/app/dictionaries";
+import { BlogList } from "@/component/blog/BlogList";
+import { PageHero } from "@/component/common/PageHero";
 import { Newspaper } from "lucide-react";
 import type { Metadata } from "next";
-import { getDictionary } from "@/app/dictionaries";
-import { PageHero } from "@/component/common/PageHero";
-import { BlogList } from "@/component/blog/BlogList";
 
 const DESCRIPTION =
-  "Shopping guides, shipping explainers and seller tips from the BongoOcean team.";
+  "Shopping guides, shipping explainers and seller tips from the Shaajs team.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();

@@ -102,7 +102,7 @@ export function EditProfileForm({ dict, profile }: EditProfileFormProps) {
           )}
         </button>
         <Link
-          href="/customer-profile"
+          href="/account"
           className="text-sm font-semibold text-(--color-text-muted) hover:text-(--color-dark)"
         >
           {dict.common.cancel}

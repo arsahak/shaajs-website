@@ -34,6 +34,7 @@ import {
   Menu,
   Package,
   Search,
+  Settings,
   ShoppingBag,
   ShoppingCart,
   Sparkles,
@@ -581,14 +582,25 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
               <div className="grid grid-cols-2 gap-2">
                 {/* A link doesn't get <button>'s built-in flex layout, so it is
                     set here — otherwise the icon drops onto its own line. */}
-                <Link
-                  href="/orders"
-                  onClick={closeDrawer}
-                  className="flex h-10 items-center justify-center gap-2 rounded-(--radius-md) border border-(--color-border) bg-(--color-surface) text-sm font-semibold whitespace-nowrap text-(--color-dark) transition-colors hover:text-(--color-dark) active:bg-(--color-bg)"
-                >
-                  <Package className="h-4 w-4 shrink-0 text-(--color-primary)" />
-                  {dict.nav.orders}
-                </Link>
+                {[
+                  { href: "/account", label: dict.nav.profile, icon: User },
+                  { href: "/orders", label: dict.nav.orders, icon: Package },
+                  {
+                    href: "/account/settings",
+                    label: dict.nav.settings,
+                    icon: Settings,
+                  },
+                ].map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={closeDrawer}
+                    className="flex h-10 items-center justify-center gap-2 rounded-(--radius-md) border border-(--color-border) bg-(--color-surface) text-sm font-semibold whitespace-nowrap text-(--color-dark) transition-colors hover:text-(--color-dark) active:bg-(--color-bg)"
+                  >
+                    <Icon className="h-4 w-4 shrink-0 text-(--color-primary)" />
+                    {label}
+                  </Link>
+                ))}
                 <form action={signoutAction}>
                   <button
                     type="submit"

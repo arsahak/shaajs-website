@@ -1,15 +1,20 @@
 "use client";
 
+import {
+  requestSigninOtpAction,
+  verifySigninOtpAction,
+} from "@/app/actions/auth";
 import { fieldClass, submitClass } from "@/component/auth/authStyles";
 import { OtpInput } from "@/component/auth/OtpInput";
 import { easeSmooth } from "@/component/motion/variants";
+import { queueToast } from "@/component/providers/ToastProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import { parsePhoneNumberFromString } from "libphonenumber-js/min";
-import { ArrowRight, AtSign, Check, Loader2, Phone } from "lucide-react";
+import { ArrowRight, AtSign, Loader2, Phone } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 
-export type OtpSignInStep = "contact" | "otp" | "done";
+export type OtpSignInStep = "contact" | "otp";
 export type OtpSignInChannel = "phone" | "email";
 
 interface OtpSignInProps {
@@ -21,22 +26,18 @@ interface OtpSignInProps {
    * way to "otp".
    */
   onStepChange: (step: OtpSignInStep, sentTo?: string) => void;
-  /** Closes the modal once the visitor is through. */
-  onDone?: () => void;
+  /** Where a successful sign-in lands. */
+  callbackUrl: string;
 }
 
 export const otpSignInCopy = {
   phone: {
     label: "Phone",
     invalid: "Enter a valid Bangladeshi mobile number.",
-    demoHint: "Demo: no SMS is sent yet — any 6 digits will work.",
-    doneTitle: "Number verified",
   },
   email: {
     label: "Email",
     invalid: "Enter a valid email address.",
-    demoHint: "Demo: no email is sent yet — any 6 digits will work.",
-    doneTitle: "Email verified",
   },
   signIn: "Sign in",
   otpSending: "Sending code…",
@@ -48,40 +49,33 @@ export const otpSignInCopy = {
   otpResend: "Resend code",
   otpResent: "A new code is on its way.",
   otpChange: { phone: "Change number", email: "Change email" },
-  doneSubtitle: "Thanks for trying it out.",
-  otpDemoDone:
-    "This is a demo. Signing in with a code isn't connected to our server yet, so you are not signed in.",
-  done: "Done",
+  signedIn: "Signed in successfully. Welcome to Shaajs!",
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_LENGTH = 6;
-const RESEND_COOLDOWN_SECONDS = 30;
-// How long the demo "sends" and "checks" a code, so the buttons show their
-// busy state the way they will with a real server.
-const DEMO_DELAY_MS = 700;
+// Same wait the backend enforces between two codes.
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const linkButtonClass =
   "p-0 text-sm font-semibold text-(--color-primary) hover:text-(--color-primary-dark) disabled:cursor-not-allowed disabled:text-(--color-text-light)";
 
 /**
  * Sign in with a phone number or an email address and a one-time code — no
- * password.
- *
- * DEMO: nothing here talks to the backend yet. No SMS or email is sent, any
- * six digits are accepted, and nobody is actually signed in at the end. When
- * the backend has code sign-in, `sendCode` and `verifyCode` are the two places
- * to call it.
+ * password. The code goes out by SMS or email; a phone number or email with no
+ * account yet gets one when its code is confirmed, so this is sign-up too.
  */
 export function OtpSignIn({
   channel,
   step,
   onStepChange,
-  onDone,
+  callbackUrl,
 }: OtpSignInProps) {
   const copy = otpSignInCopy;
   const channelCopy = copy[channel];
   const [contact, setContact] = useState("");
+  // The email/phone as the backend normalized it — what the code is tied to.
+  const [identifier, setIdentifier] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -95,8 +89,9 @@ export function OtpSignIn({
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const sendCode = (event: FormEvent<HTMLFormElement>) => {
+  const sendCode = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    let sendTo: string;
     let sentTo: string;
     if (channel === "phone") {
       // Accepts 01XXXXXXXXX, 1XXXXXXXXX and +8801XXXXXXXXX alike.
@@ -105,10 +100,12 @@ export function OtpSignIn({
         setError(channelCopy.invalid);
         return;
       }
+      sendTo = number.number;
       sentTo = number.formatInternational();
     } else {
-      sentTo = contact.trim();
-      if (!EMAIL_RE.test(sentTo)) {
+      sendTo = contact.trim();
+      sentTo = sendTo;
+      if (!EMAIL_RE.test(sendTo)) {
         setError(channelCopy.invalid);
         return;
       }
@@ -116,15 +113,20 @@ export function OtpSignIn({
 
     setError("");
     setPending(true);
-    setTimeout(() => {
-      setPending(false);
-      setOtp("");
-      setResendCooldown(RESEND_COOLDOWN_SECONDS);
-      onStepChange("otp", sentTo);
-    }, DEMO_DELAY_MS);
+    const result = await requestSigninOtpAction(sendTo);
+    setPending(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+
+    setIdentifier(result.identifier);
+    setOtp("");
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    onStepChange("otp", sentTo);
   };
 
-  const verifyCode = (event: FormEvent<HTMLFormElement>) => {
+  const verifyCode = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (otp.length < OTP_LENGTH) {
       setError(copy.otpIncomplete);
@@ -133,15 +135,34 @@ export function OtpSignIn({
 
     setError("");
     setPending(true);
-    setTimeout(() => {
+    const result = await verifySigninOtpAction({
+      identifier,
+      otp,
+      callbackUrl,
+    });
+    if (!result.ok) {
       setPending(false);
-      onStepChange("done");
-    }, DEMO_DELAY_MS);
+      setError(result.error ?? "Could not verify the code. Please try again.");
+      return;
+    }
+
+    // Stays busy until the page changes. Queued rather than shown directly,
+    // since the full page navigation would discard it — and a full navigation
+    // so server components re-render with the fresh session cookie.
+    queueToast("success", copy.signedIn);
+    window.location.href = result.redirectTo || callbackUrl;
   };
 
-  const resend = () => {
+  const resend = async () => {
     setOtp("");
     setError("");
+    setPending(true);
+    const result = await requestSigninOtpAction(identifier);
+    setPending(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
     setResendCooldown(RESEND_COOLDOWN_SECONDS);
     toast.success(copy.otpResent);
   };
@@ -267,9 +288,6 @@ export function OtpSignIn({
                   {error}
                 </p>
               )}
-              <p className="mt-3 text-center text-xs text-(--color-text-light)">
-                {channelCopy.demoHint}
-              </p>
             </div>
 
             <button type="submit" disabled={pending} className={submitClass}>
@@ -303,7 +321,7 @@ export function OtpSignIn({
               <button
                 type="button"
                 onClick={resend}
-                disabled={resendCooldown > 0}
+                disabled={pending || resendCooldown > 0}
                 className={linkButtonClass}
               >
                 {resendCooldown > 0
@@ -312,20 +330,6 @@ export function OtpSignIn({
               </button>
             </div>
           </form>
-        )}
-
-        {step === "done" && (
-          <div className="flex flex-col items-center gap-5 py-2 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--color-primary-faint) text-(--color-primary)">
-              <Check size={30} strokeWidth={2.5} />
-            </span>
-            <p className="max-w-[36ch] text-sm leading-6 text-(--color-text-muted)">
-              {copy.otpDemoDone}
-            </p>
-            <button type="button" onClick={onDone} className={submitClass}>
-              {copy.done}
-            </button>
-          </div>
         )}
       </motion.div>
     </AnimatePresence>

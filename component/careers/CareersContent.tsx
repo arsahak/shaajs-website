@@ -71,7 +71,7 @@ const teams: Feature[] = [
     icon: Megaphone,
     title: "Marketing",
     description:
-      "Tell the BongoOcean story and bring new shoppers and sellers to the marketplace.",
+      "Tell the Shaajs story and bring new shoppers and sellers to the marketplace.",
   },
 ];
 
@@ -111,7 +111,7 @@ export function CareersContent() {
       <Section
         tone="surface"
         title="Teams"
-        subtitle="The groups behind BongoOcean — and where you might fit in."
+        subtitle="The groups behind Shaajs — and where you might fit in."
       >
         <FeatureGrid items={teams} muted />
       </Section>

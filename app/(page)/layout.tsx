@@ -19,20 +19,25 @@ export default async function PageLayout({
   // what was true at sign-in, so re-fetch the live profile instead of
   // trusting a token that could be stale (e.g. after an avatar change).
   let navbarUser: NavbarUser | null = null;
+  // An account made by signing in with a code is called "Customer" until it
+  // has a real name — the menu then shows the email or phone instead.
+  const realName = (name?: string | null) =>
+    name && name.trim() !== "Customer" ? name : null;
   if (session?.user) {
     const profile = await getMyProfile();
     navbarUser = profile.ok
       ? {
-          name:
+          name: realName(
             [profile.data.firstName, profile.data.lastName]
               .filter(Boolean)
               .join(" ") || session.user.name,
+          ),
           email: profile.data.email ?? session.user.email,
           phone: profile.data.phone ?? null,
           image: profile.data.avatar ?? null,
         }
       : {
-          name: session.user.name,
+          name: realName(session.user.name),
           email: session.user.email,
           phone: null,
           image: null,

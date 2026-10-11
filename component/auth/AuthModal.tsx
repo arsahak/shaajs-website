@@ -16,6 +16,12 @@ export interface AuthModalState {
   identifier?: string;
 }
 
+// For now the only way in is the code sign-in (phone or email + OTP), which
+// also creates the account — so the password sign-up and "forgot password"
+// screens are switched off and their addresses open sign-in instead. Set this
+// to false to bring them back.
+const CODE_SIGN_IN_ONLY = true;
+
 interface AuthModalProps {
   dict: Dictionary;
   /** `null` while the modal is closed. */
@@ -35,6 +41,9 @@ export function AuthModal({
   onSwitchView,
 }: AuthModalProps) {
   const open = state !== null;
+  const view: AuthView = CODE_SIGN_IN_ONLY
+    ? "sign-in"
+    : (state?.view ?? "sign-in");
 
   // While open: Escape closes it, and the page behind doesn't scroll.
   useEffect(() => {
@@ -77,7 +86,7 @@ export function AuthModal({
               role="dialog"
               aria-modal="true"
               aria-label={
-                state.view === "sign-up" ? dict.nav.sign_up : dict.nav.sign_in
+                view === "sign-up" ? dict.nav.sign_up : dict.nav.sign_in
               }
               initial={{ opacity: 0, y: 28, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -94,7 +103,7 @@ export function AuthModal({
                 <X className="h-[18px] w-[18px] shrink-0" />
               </button>
 
-              {state.view === "forgot-password" ? (
+              {view === "forgot-password" ? (
                 <ForgotPasswordForm
                   dict={dict}
                   initialIdentifier={state.identifier}
@@ -103,11 +112,10 @@ export function AuthModal({
                 />
               ) : (
                 <AuthForm
-                  mode={state.view}
+                  mode={view}
                   dict={dict}
                   callbackUrl={state.callbackUrl}
                   onSwitchView={onSwitchView}
-                  onClose={onClose}
                 />
               )}
             </motion.div>

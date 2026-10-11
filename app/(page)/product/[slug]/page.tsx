@@ -1,7 +1,3 @@
-import { ChevronRight } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
   getCatalogProductAction,
   listCatalogProductsAction,
@@ -24,6 +20,10 @@ import {
   resolveCatalogFallbackIcon,
   toCatalogCardProduct,
 } from "@/component/product/catalogProductCard";
+import { ChevronRight } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 const badgeClass: Record<"new" | "hot" | "sale", string> = {
   new: "badge-success",
@@ -46,20 +46,25 @@ const HTML_ENTITIES: Record<string, string> = {
 // paragraphs/line breaks stay on their own line — instead of flattening
 // everything into one run-on line.
 function stripHtml(html: string): string {
-  return html
-    .replace(/<li[^>]*>/gi, "\n• ")
-    .replace(/<\/li>/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|h[1-6]|tr|ul|ol|table)>/gi, "\n")
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;|&apos;/g, (m) => HTML_ENTITIES[m])
-    .split("\n")
-    .map((line) => line.replace(/[ \t]+/g, " ").trim())
-    // No blank lines between blocks — paragraphs and bullets stack tight,
-    // one per line, instead of leaving a gap-sized empty line between them.
-    .filter((line) => line !== "")
-    .join("\n")
-    .trim();
+  return (
+    html
+      .replace(/<li[^>]*>/gi, "\n• ")
+      .replace(/<\/li>/gi, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|h[1-6]|tr|ul|ol|table)>/gi, "\n")
+      .replace(/<[^>]*>/g, "")
+      .replace(
+        /&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;|&apos;/g,
+        (m) => HTML_ENTITIES[m],
+      )
+      .split("\n")
+      .map((line) => line.replace(/[ \t]+/g, " ").trim())
+      // No blank lines between blocks — paragraphs and bullets stack tight,
+      // one per line, instead of leaving a gap-sized empty line between them.
+      .filter((line) => line !== "")
+      .join("\n")
+      .trim()
+  );
 }
 
 // Deterministic per-product, so repeat visits to the same product show the
@@ -102,7 +107,7 @@ export async function generateMetadata({
       url: path,
       title: product.title,
       description: description || undefined,
-      siteName: "BongoOcean",
+      siteName: "Shaajs",
       ...(images && { images }),
     },
     twitter: {
@@ -160,9 +165,9 @@ export default async function ProductDetailPage({
     Icon: CATALOG_CARD_ICONS[index % CATALOG_CARD_ICONS.length],
   }));
 
-  const reviews = reviewsRes.ok ? reviewsRes.data?.reviews ?? [] : [];
+  const reviews = reviewsRes.ok ? (reviewsRes.data?.reviews ?? []) : [];
   const reviewSummary = reviewsRes.ok
-    ? reviewsRes.data?.summary ?? { averageRating: 0, totalReviews: 0 }
+    ? (reviewsRes.data?.summary ?? { averageRating: 0, totalReviews: 0 })
     : { averageRating: 0, totalReviews: 0 };
 
   // shortDescription comes from the dashboard's rich-text editor as HTML —
@@ -185,7 +190,8 @@ export default async function ProductDetailPage({
   }));
   if (
     rawProduct.videoUrl &&
-    (rawProduct.videoSource === "upload" || rawProduct.videoSource === "youtube")
+    (rawProduct.videoSource === "upload" ||
+      rawProduct.videoSource === "youtube")
   ) {
     media.splice(Math.min(1, media.length), 0, {
       type: "video",
@@ -244,61 +250,61 @@ export default async function ProductDetailPage({
       </nav>
 
       <ProductSelectionProvider options={options}>
-      <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* Gallery */}
-        <ProductGallery
-          media={media}
-          alt={product.name}
-          fallbackGradient={product.gradient}
-          fallback={
-            <FallbackIcon
-              aria-hidden="true"
-              strokeWidth={1}
-              size={180}
-              className="absolute inset-0 m-auto text-white/90"
-            />
-          }
-          badge={
-            product.badge && (
-              <span
-                className={`badge ${badgeClass[product.badge]} absolute start-3 top-3 z-10`}
-              >
-                {product.badge}
-              </span>
-            )
-          }
-        />
-
-        {/* Info */}
-        <div>
-          {category && (
-            <span className="text-xs font-semibold tracking-wide text-(--color-primary) uppercase">
-              {category.name}
-            </span>
-          )}
-          <h1 className="mt-1.5 text-xl font-bold text-(--color-dark) sm:text-2xl">
-            {product.name}
-          </h1>
-
-          <div className="mt-2 flex items-center gap-2 text-sm text-(--color-text-muted)">
-            <span className="font-medium text-(--color-dark)">
-              ★ {product.rating}
-            </span>
-            <span>({product.reviews.toLocaleString()} reviews)</span>
-            <span aria-hidden="true">·</span>
-            <span>{product.sold}</span>
-          </div>
-
-          <ProductDetailInfo
-            product={product}
-            shortDescription={shortDescription}
-            weight={product.weight}
-            unit={product.unit}
-            addToCartLabel={dict.common.add_to_cart}
-            buyNowLabel={dict.common.buy_now}
+        <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* Gallery */}
+          <ProductGallery
+            media={media}
+            alt={product.name}
+            fallbackGradient={product.gradient}
+            fallback={
+              <FallbackIcon
+                aria-hidden="true"
+                strokeWidth={1}
+                size={180}
+                className="absolute inset-0 m-auto text-white/90"
+              />
+            }
+            badge={
+              product.badge && (
+                <span
+                  className={`badge ${badgeClass[product.badge]} absolute start-3 top-3 z-10`}
+                >
+                  {product.badge}
+                </span>
+              )
+            }
           />
+
+          {/* Info */}
+          <div>
+            {category && (
+              <span className="text-xs font-semibold tracking-wide text-(--color-primary) uppercase">
+                {category.name}
+              </span>
+            )}
+            <h1 className="mt-1.5 text-xl font-bold text-(--color-dark) sm:text-2xl">
+              {product.name}
+            </h1>
+
+            <div className="mt-2 flex items-center gap-2 text-sm text-(--color-text-muted)">
+              <span className="font-medium text-(--color-dark)">
+                ★ {product.rating}
+              </span>
+              <span>({product.reviews.toLocaleString()} reviews)</span>
+              <span aria-hidden="true">·</span>
+              <span>{product.sold}</span>
+            </div>
+
+            <ProductDetailInfo
+              product={product}
+              shortDescription={shortDescription}
+              weight={product.weight}
+              unit={product.unit}
+              addToCartLabel={dict.common.add_to_cart}
+              buyNowLabel={dict.common.buy_now}
+            />
+          </div>
         </div>
-      </div>
       </ProductSelectionProvider>
 
       <ProductTabs

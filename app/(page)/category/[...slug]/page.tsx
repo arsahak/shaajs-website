@@ -1,12 +1,12 @@
-import { Package, type LucideIcon } from "lucide-react";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { cache } from "react";
 import { listCategoriesAction, type Category } from "@/app/actions/category";
 import { navCategories } from "@/app/data/categories";
 import { getDictionary } from "@/app/dictionaries";
 import { PageHero } from "@/component/common/PageHero";
 import { ProductGrid } from "@/component/product/ProductGrid";
+import { Package, type LucideIcon } from "lucide-react";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { cache } from "react";
 
 type Props = { params: Promise<{ slug: string[] }> };
 
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: category.title,
-    description: `Shop ${category.title} from trusted sellers on BongoOcean.`,
+    description: `Shop ${category.title} from trusted sellers on Shaajs.`,
     alternates: { canonical: `/category/${slug.join("/")}` },
   };
 }

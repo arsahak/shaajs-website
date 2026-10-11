@@ -2,6 +2,7 @@
 
 import {
   getMyOrderAction,
+  trackGuestOrderAction,
   type Order,
   type OrderStatus,
 } from "@/app/actions/order";
@@ -44,6 +45,8 @@ const ERROR_MESSAGE = {
   auth: "Please sign in to track your order.",
   not_found:
     "We could not find that order on your account. Check the number and try again.",
+  guest_not_found:
+    "We could not find an order with that number and phone number or email. Check both and try again.",
   error: "Something went wrong while looking up your order. Please try again.",
 };
 
@@ -53,6 +56,8 @@ export function TrackOrder({
   initialOrderNumber = "",
 }: TrackOrderProps) {
   const [orderNumber, setOrderNumber] = useState(initialOrderNumber);
+  // Guests only: the phone number or email the order was placed with.
+  const [contact, setContact] = useState("");
   const [lookup, setLookup] = useState<Lookup>({ state: "idle" });
   const [pending, startTransition] = useTransition();
   const { openAuth } = useAuthModal();
@@ -65,20 +70,32 @@ export function TrackOrder({
     cancelled: dict.orders.status_cancelled,
   };
 
-  const runLookup = (value: string) => {
+  // Signed in: one of the account's own orders. Guest: any order, proven by
+  // the phone number or email it was placed with.
+  const runLookup = (value: string, guestContact = contact) => {
     const trimmed = value.trim();
     if (!trimmed) return;
 
     startTransition(async () => {
-      const result = await getMyOrderAction(trimmed);
+      const result = isSignedIn
+        ? await getMyOrderAction(trimmed)
+        : await trackGuestOrderAction(trimmed, guestContact);
       setLookup(
         result.ok
           ? { state: "found", order: result.order }
-          : { state: "error", message: ERROR_MESSAGE[result.reason] },
+          : {
+              state: "error",
+              message:
+                !isSignedIn && result.reason === "not_found"
+                  ? ERROR_MESSAGE.guest_not_found
+                  : ERROR_MESSAGE[result.reason],
+            },
       );
     });
   };
 
+  // Signed in and arriving with an order number (?id=…): looked up straight
+  // away. Without an account the phone or email is needed first.
   useEffect(() => {
     if (isSignedIn && initialOrderNumber) runLookup(initialOrderNumber);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,8 +123,9 @@ export function TrackOrder({
         <div>
           <h2 className="section-title">Where is my order?</h2>
           <p className="section-subtitle mt-1">
-            Enter the order number from your confirmation to see its latest
-            status.
+            {isSignedIn
+              ? "Enter the order number from your confirmation to see its latest status."
+              : "Enter the order number from your confirmation and the phone number or email you ordered with."}
           </p>
         </div>
       </div>
@@ -143,25 +161,69 @@ export function TrackOrder({
           </button>
         </form>
       ) : (
-        <div className="mt-6 flex flex-col items-start gap-4 rounded-(--radius-lg) border border-dashed border-(--color-border) bg-(--color-bg) p-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-(--color-text-muted)">
-            Orders are linked to your account. Sign in to look up an order and
-            see your full order history.
-          </p>
-          <Link
-            href={signInHref}
-            onClick={(event) => {
-              event.preventDefault();
-              openAuth("sign-in", { callbackUrl: "/orders/track" });
-            }}
-            // A link doesn't get the flex layout <button> has, so set it here —
-            // otherwise the icon sits on its own line above the text.
-            className="btn-primary btn-pill inline-flex shrink-0 items-center gap-2 px-6 py-2.5 font-semibold whitespace-nowrap hover:text-white"
-          >
-            <LogIn aria-hidden="true" size={16} className="shrink-0" />
-            {dict.nav.sign_in}
-          </Link>
-        </div>
+        // No account: the order number and the phone or email it was placed with.
+        <form
+          onSubmit={handleSubmit}
+          className="mt-6 flex flex-col gap-3 sm:max-w-xl"
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="track-order-number">Order number</label>
+              <input
+                id="track-order-number"
+                type="text"
+                required
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value)}
+                placeholder="Order number"
+                className="h-12 rounded-lg px-4 text-base focus:border-(--color-dark) focus:shadow-none focus:outline-none sm:text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="track-order-contact">Phone or email</label>
+              <input
+                id="track-order-contact"
+                type="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                required
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="01XXX-XXXXXX / name@example.com"
+                className="h-12 rounded-lg px-4 text-base focus:border-(--color-dark) focus:shadow-none focus:outline-none sm:text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <button
+              type="submit"
+              disabled={pending}
+              className="btn-primary btn-pill inline-flex items-center gap-2 px-6 py-2.5 font-semibold"
+            >
+              {pending ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Search size={16} />
+              )}
+              {dict.topbar.track_order}
+            </button>
+            <Link
+              href={signInHref}
+              onClick={(event) => {
+                event.preventDefault();
+                openAuth("sign-in", { callbackUrl: "/orders/track" });
+              }}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-(--color-primary) hover:text-(--color-primary-dark)"
+            >
+              <LogIn aria-hidden="true" size={15} className="shrink-0" />
+              Have an account? {dict.nav.sign_in}
+            </Link>
+          </div>
+        </form>
       )}
 
       {lookup.state === "error" && (
@@ -245,13 +307,16 @@ export function TrackOrder({
               {itemCount} {dict.cart.items} · {dict.cart.total}{" "}
               <strong>{formatPrice(order.total)}</strong>
             </p>
-            <Link
-              href={`/orders?id=${encodeURIComponent(order.orderNumber)}`}
-              className="inline-flex items-center gap-2 text-sm font-semibold"
-            >
-              {dict.orders.title}
-              <ArrowRight size={16} />
-            </Link>
+            {/* Order history belongs to an account — a guest has none. */}
+            {isSignedIn && (
+              <Link
+                href={`/orders?id=${encodeURIComponent(order.orderNumber)}`}
+                className="inline-flex items-center gap-2 text-sm font-semibold"
+              >
+                {dict.orders.title}
+                <ArrowRight size={16} />
+              </Link>
+            )}
           </footer>
         </div>
       )}

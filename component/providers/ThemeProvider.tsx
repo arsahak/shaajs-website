@@ -17,7 +17,7 @@ interface ThemeContextValue {
   toggleTheme: () => void;
 }
 
-const STORAGE_KEY = "bongoocean-theme";
+const STORAGE_KEY = "Shaajs-theme";
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
@@ -29,25 +29,25 @@ function applyTheme(theme: Theme) {
 
   document.documentElement.setAttribute(
     "data-theme",
-    isDark ? "dark" : "light"
+    isDark ? "dark" : "light",
   );
   return isDark ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(
-    "light"
-  );
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "light";
+    const stored =
+      (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "light";
     setThemeState(stored);
     setResolvedTheme(applyTheme(stored));
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
-      const current = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "light";
+      const current =
+        (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "light";
       if (current === "system") {
         setResolvedTheme(applyTheme("system"));
       }
@@ -67,7 +67,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider
+      value={{ theme, resolvedTheme, setTheme, toggleTheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );

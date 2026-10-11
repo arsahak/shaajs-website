@@ -1,6 +1,5 @@
 import { ChevronRight, Package } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getDictionary } from "@/app/dictionaries";
 import { getMyProfile } from "@/app/actions/user";
@@ -9,13 +8,15 @@ import CheckoutDetails from "@/component/checkout/CheckoutDetails";
 export default async function CheckoutPage() {
   const dict = await getDictionary();
 
+  // Checkout is open to everyone. A signed-in customer gets their saved
+  // details filled in; anyone else types them and is verified by a one-time
+  // code when they place the order.
   const session = await auth();
-  if (!session?.user) {
-    redirect(
-      `/sign-in?callbackUrl=${encodeURIComponent("/checkout")}`,
-    );
-  }
-  const profile = await getMyProfile();
+  const profile = session?.user ? await getMyProfile() : null;
+  // An account made by signing in with a code has no real name yet (the
+  // backend's placeholder) — the form then starts with the name blank.
+  const nameOf = (name?: string | null) =>
+    name && name.trim() !== "Customer" ? name.trim() : "";
 
   return (
     <div className="container py-8">
@@ -56,15 +57,20 @@ export default async function CheckoutPage() {
       <div className="mt-6">
         <CheckoutDetails
           dict={dict}
+          // A saved session the backend no longer accepts counts as a guest.
+          isSignedIn={Boolean(profile?.ok)}
           initialUser={
             profile?.ok
               ? {
-                  name:
+                  name: nameOf(
                     [profile.data.firstName, profile.data.lastName]
                       .filter(Boolean)
                       .join(" ") || session?.user.name,
+                  ),
                   email: profile.data.email ?? session?.user.email,
                   phone: profile.data.phone,
+                  address: profile.data.address?.area,
+                  zone: profile.data.address?.zone,
                 }
               : undefined
           }

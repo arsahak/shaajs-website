@@ -19,16 +19,16 @@ const UPDATED = "October 7, 2026";
 
 export const termsOfService: LegalDocumentData = {
   description:
-    "The rules for using BongoOcean, placing orders and selling on the marketplace.",
+    "The rules for using Shaajs, placing orders and selling on the marketplace.",
   updated: UPDATED,
   intro:
-    "These Terms of Service explain the rules for using BongoOcean. By browsing the site, creating an account or placing an order, you agree to them. Please read them carefully.",
+    "These Terms of Service explain the rules for using Shaajs. By browsing the site, creating an account or placing an order, you agree to them. Please read them carefully.",
   sections: [
     {
-      id: "using-bongoocean",
-      title: "Using BongoOcean",
+      id: "using-Shaajs",
+      title: "Using Shaajs",
       paragraphs: [
-        "BongoOcean is an online marketplace where shoppers in Bangladesh can discover and order products from trusted sellers. You may use the site only for lawful purposes and in line with these terms.",
+        "Shaajs is an online marketplace where shoppers in Bangladesh can discover and order products from trusted sellers. You may use the site only for lawful purposes and in line with these terms.",
         "You must be old enough to enter into a binding agreement in your country to place an order.",
       ],
     },
@@ -80,7 +80,7 @@ export const termsOfService: LegalDocumentData = {
     {
       id: "prohibited-use",
       title: "Prohibited use",
-      paragraphs: ["When using BongoOcean you must not:"],
+      paragraphs: ["When using Shaajs you must not:"],
       bullets: [
         "Break any law or infringe anyone else's rights.",
         "Provide false information or impersonate another person or business.",
@@ -92,14 +92,14 @@ export const termsOfService: LegalDocumentData = {
       id: "intellectual-property",
       title: "Intellectual property",
       paragraphs: [
-        "The BongoOcean name, logo, design and content belong to us or our licensors. You may not copy or reuse them without written permission. Product images and descriptions remain the property of the sellers who supplied them.",
+        "The Shaajs name, logo, design and content belong to us or our licensors. You may not copy or reuse them without written permission. Product images and descriptions remain the property of the sellers who supplied them.",
       ],
     },
     {
       id: "liability",
       title: "Limitation of liability",
       paragraphs: [
-        "We provide the site on an \"as available\" basis. To the extent the law allows, we are not liable for indirect or consequential losses arising from your use of BongoOcean. Nothing in these terms limits rights you have under consumer protection law.",
+        'We provide the site on an "as available" basis. To the extent the law allows, we are not liable for indirect or consequential losses arising from your use of Shaajs. Nothing in these terms limits rights you have under consumer protection law.',
       ],
     },
     {
@@ -113,7 +113,7 @@ export const termsOfService: LegalDocumentData = {
       id: "changes",
       title: "Changes to these terms",
       paragraphs: [
-        "We may update these terms from time to time. The date at the top of the page shows when they last changed. Continuing to use BongoOcean after an update means you accept the new terms.",
+        "We may update these terms from time to time. The date at the top of the page shows when they last changed. Continuing to use Shaajs after an update means you accept the new terms.",
       ],
     },
     {
@@ -128,10 +128,10 @@ export const termsOfService: LegalDocumentData = {
 
 export const privacyPolicy: LegalDocumentData = {
   description:
-    "What personal information BongoOcean collects, why, and the choices you have.",
+    "What personal information Shaajs collects, why, and the choices you have.",
   updated: UPDATED,
   intro:
-    "This Privacy Policy describes what personal information BongoOcean collects, why we collect it and the choices you have. We only collect what we need to run the marketplace and look after your orders.",
+    "This Privacy Policy describes what personal information Shaajs collects, why we collect it and the choices you have. We only collect what we need to run the marketplace and look after your orders.",
   sections: [
     {
       id: "information-we-collect",
@@ -197,7 +197,7 @@ export const privacyPolicy: LegalDocumentData = {
       id: "children",
       title: "Children",
       paragraphs: [
-        "BongoOcean is not intended for children, and we do not knowingly collect personal information from them.",
+        "Shaajs is not intended for children, and we do not knowingly collect personal information from them.",
       ],
     },
     {
@@ -210,19 +210,17 @@ export const privacyPolicy: LegalDocumentData = {
     {
       id: "contact",
       title: "Contact us",
-      paragraphs: [
-        `For any privacy question, email ${company.legalEmail}.`,
-      ],
+      paragraphs: [`For any privacy question, email ${company.legalEmail}.`],
     },
   ],
 };
 
 export const cookiePolicy: LegalDocumentData = {
   description:
-    "The cookies and browser storage BongoOcean uses, and how to control them.",
+    "The cookies and browser storage Shaajs uses, and how to control them.",
   updated: UPDATED,
   intro:
-    "This Cookie Policy explains what cookies and similar browser storage BongoOcean uses and how you can control them.",
+    "This Cookie Policy explains what cookies and similar browser storage Shaajs uses and how you can control them.",
   sections: [
     {
       id: "what-are-cookies",

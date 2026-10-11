@@ -28,7 +28,7 @@ export interface BlogPost {
 export const blogPosts: BlogPost[] = [
   {
     slug: "how-delivery-works",
-    title: "How Delivery Works on BongoOcean",
+    title: "How Delivery Works on Shaajs",
     excerpt:
       "From the confirmation call to the knock on your door — a plain-language look at the journey your parcel takes across Bangladesh.",
     category: "Delivery",
@@ -99,8 +99,8 @@ export const blogPosts: BlogPost[] = [
     ],
   },
   {
-    slug: "start-selling-on-bongoocean",
-    title: "Getting Started as a Seller on BongoOcean",
+    slug: "start-selling-on-Shaajs",
+    title: "Getting Started as a Seller on Shaajs",
     excerpt:
       "What we look for in new sellers, how the application works and how to prepare listings that convert.",
     category: "Sellers",
@@ -129,7 +129,7 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "Applying",
         paragraphs: [
-          "Head to the Sell on BongoOcean page and send us your business details. Our seller team will get back to you and walk you through setting up your store.",
+          "Head to the Sell on Shaajs page and send us your business details. Our seller team will get back to you and walk you through setting up your store.",
         ],
       },
     ],

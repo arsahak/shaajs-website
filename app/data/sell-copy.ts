@@ -5,7 +5,7 @@ interface TitledText {
   description: string;
 }
 
-/** Every piece of text on the Sell on BongoOcean page, in one language. */
+/** Every piece of text on the Sell on Shaajs page, in one language. */
 export interface SellCopy {
   /** Hero subtitle and the page's meta description. */
   description: string;
@@ -27,7 +27,7 @@ export interface SellCopy {
 
 const en: SellCopy = {
   description:
-    "Open your store on BongoOcean and reach shoppers all over Bangladesh.",
+    "Open your store on Shaajs and reach shoppers all over Bangladesh.",
   benefits: {
     title: "Turn your inventory into income",
     subtitle:
@@ -58,7 +58,7 @@ const en: SellCopy = {
   requirements: {
     title: "What you need to get started",
     subtitle:
-      "We keep the bar simple and clear, so shoppers can trust every store on BongoOcean.",
+      "We keep the bar simple and clear, so shoppers can trust every store on Shaajs.",
     items: [
       "A registered business, or proof that you manufacture or own the brand.",
       "Genuine products that are legal to sell in Bangladesh.",
@@ -98,7 +98,7 @@ const en: SellCopy = {
     items: getFaqCategory("selling")?.items ?? [],
   },
   cta: {
-    title: "Open your store on BongoOcean",
+    title: "Open your store on Shaajs",
     description:
       "Tell us about your business and our seller team will be in touch to help you get set up.",
     primary: "Apply to sell",
