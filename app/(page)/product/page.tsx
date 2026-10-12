@@ -6,10 +6,13 @@ import {
   type ProductCollection,
 } from "@/component/product/ProductGrid";
 
-// The navbar's "New Arrivals" / "Best Sellers" links: /product?collection=…
+// The navbar's "New Arrivals" / "Best Sellers" links (and the collections in
+// the page's own sidebar): /product?collection=…
 const COLLECTION_TITLES: Record<ProductCollection, string> = {
-  "new-arrivals": "New Arrivals",
+  "top-selling": "Top Selling",
+  "free-delivery": "Free Delivery",
   "best-sellers": "Best Sellers",
+  "new-arrivals": "New Arrivals",
 };
 
 export default async function ProductPage({

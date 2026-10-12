@@ -11,7 +11,11 @@ export interface Brand {
   description?: string;
   logo?: string;
   isActive: boolean;
+  /** Picked in the dashboard as one of the store's top brands. */
+  isTopBrand?: boolean;
   sortOrder: number;
+  /** Active products sold under this brand. */
+  productCount?: number;
 }
 
 interface BrandDataResponse<T = unknown> {
@@ -22,9 +26,12 @@ interface BrandDataResponse<T = unknown> {
 
 // ── List brands (public backend endpoint — no auth required) ──────────────────
 
-export async function listBrandsAction(): Promise<BrandDataResponse<Brand[]>> {
+// `top: true` asks for the top brands only (a short list, for the header).
+export async function listBrandsAction(
+  options: { top?: boolean } = {},
+): Promise<BrandDataResponse<Brand[]>> {
   try {
-    const res = await fetch(`${API}/brands`, {
+    const res = await fetch(`${API}/brands${options.top ? "?top=true" : ""}`, {
       method: "GET",
       cache: "no-store",
     });

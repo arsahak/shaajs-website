@@ -14,7 +14,6 @@ import {
   type OtpSignInStep,
 } from "@/component/auth/OtpSignIn";
 import { usePinnedPosition } from "@/component/auth/usePinnedPosition";
-import { FacebookOutlineIcon } from "@/component/icons/SocialIcons";
 import { queueToast } from "@/component/providers/ToastProvider";
 import {
   ArrowRight,
@@ -30,7 +29,6 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import {
   useActionState,
   useEffect,
@@ -56,13 +54,11 @@ interface AuthFormProps {
 }
 
 export const supplementalCopy = {
-  facebook: "Continue with Facebook",
   emailSignIn: "Sign in with Email",
   emailSignUp: "Sign up with Email",
   phoneSignIn: "Sign in with Phone",
   phoneSignUp: "Sign up with Phone",
   phone: "Phone",
-  comingSoon: "Coming soon",
   signIn: "Sign in",
   signUp: "Create account",
   termsLead: "By creating an account, you agree to our",
@@ -652,8 +648,7 @@ export function AuthForm({
       </form>
       )}
 
-      {/* Other ways in. The first button switches between phone and email;
-          Facebook sign-in isn't available yet and just says so. */}
+      {/* The other way in: one button that switches between phone and email. */}
       {!showOtpStep && !(codeSignIn && codeStep !== "contact") && (
         <div className="mt-7">
           <div className="flex items-center gap-3 text-xs font-medium text-(--color-text-light) uppercase">
@@ -661,7 +656,7 @@ export function AuthForm({
             {dict.common.or}
             <span className="h-px flex-1 bg-(--color-border)" />
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="mt-5">
             <button
               type="button"
               onClick={() => {
@@ -694,14 +689,6 @@ export function AuthForm({
                 : isSignUp
                   ? copy.phoneSignUp
                   : copy.phoneSignIn}
-            </button>
-            <button
-              type="button"
-              onClick={() => toast(copy.comingSoon)}
-              className={altSignInClass}
-            >
-              <FacebookOutlineIcon size={18} className="shrink-0" />
-              {copy.facebook}
             </button>
           </div>
         </div>

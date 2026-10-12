@@ -96,9 +96,11 @@ export function toCatalogCardProduct(
     // only shows up (struck through) as `originalPrice` when discounted.
     price: hasDiscount ? product.discountPrice! : product.price,
     originalPrice: hasDiscount ? product.price : undefined,
-    rating: 4.5 + (index % 4) * 0.1,
-    reviews: Math.max(50, product.stock),
-    sold: `${Math.max(100, product.stock)} sold`,
+    // The shop's real figures — a product nobody has reviewed or bought yet
+    // honestly shows 0, 0 reviews and 0 sold.
+    rating: product.averageRating ?? 0,
+    reviews: product.reviewCount ?? 0,
+    sold: `${(product.soldCount ?? 0).toLocaleString("en")} sold`,
     badge: resolveCatalogBadge(product),
     gradient: CATALOG_CARD_GRADIENTS[index % CATALOG_CARD_GRADIENTS.length],
     weight: product.weight,

@@ -196,7 +196,10 @@ export function ProductGallery({
       className="lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:self-start"
     >
       <div
-        className={`grid gap-3 ${count > 1 ? "lg:grid-cols-[4.5rem_minmax(0,1fr)]" : ""}`}
+        // The thumbnail column is there whenever the product has a picture —
+        // a lone feature image gets its one thumbnail too, so every product
+        // page is laid out the same way.
+        className={`grid gap-3 ${count > 0 ? "lg:grid-cols-[4.5rem_minmax(0,1fr)]" : ""}`}
       >
         {/* Main viewer — a square no taller than the screen space left under
             the header (minus the thumbnail row on small screens). */}
@@ -295,8 +298,9 @@ export function ProductGallery({
         </div>
 
         {/* Thumbnails — a row under the image on small screens, a scrollable
-            column beside it on desktop that never grows taller than the image. */}
-        {count > 1 && (
+            column beside it on desktop that never grows taller than the image.
+            Shown for a single picture as well (just the feature image). */}
+        {count > 0 && (
           <div className="relative lg:order-1">
             <div className="flex gap-2.5 overflow-x-auto pb-1 max-lg:justify-center lg:absolute lg:inset-0 lg:flex-col lg:overflow-x-visible lg:overflow-y-auto lg:pb-0 lg:[scrollbar-width:thin]">
               {media.map((item, index) => {

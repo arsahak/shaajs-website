@@ -153,7 +153,12 @@ export function FeaturedProducts({ dict }: FeaturedProductsProps) {
               const Icon = CATALOG_CARD_ICONS[i % CATALOG_CARD_ICONS.length];
 
               return (
-                <FadeIn key={product.id} delay={Math.min(i, 4) * 0.05}>
+                <FadeIn
+                  key={product.id}
+                  delay={Math.min(i, 4) * 0.05}
+                  // Full height of the grid cell, so the card inside can fill it.
+                  className="h-full"
+                >
                   <ProductCard
                     addToCartLabel={dict.common.add_to_cart}
                     product={product}

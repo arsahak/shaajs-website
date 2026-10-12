@@ -7,7 +7,7 @@ import { formatPhoneDisplay } from "@/app/data/phone-countries";
 import type { Dictionary } from "@/app/dictionaries";
 import { Logo } from "@/component/common/Logo";
 import { AnnouncementBar } from "@/component/layout/AnnouncementBar";
-import { BrandMenu, brandHref } from "@/component/layout/BrandMenu";
+import { BrandMenu } from "@/component/layout/BrandMenu";
 import { MegaMenu } from "@/component/layout/MegaMenu";
 import { MobileQuickActions } from "@/component/layout/MobileQuickActions";
 import { NavSearch } from "@/component/layout/NavSearch";
@@ -23,22 +23,19 @@ import { useCart } from "@/component/providers/CartProvider";
 import { useWishlist } from "@/component/providers/WishlistProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowRight,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Heart,
-  HelpCircle,
   Home,
   LogOut,
   Menu,
   Package,
   Search,
-  Settings,
   ShoppingBag,
   ShoppingCart,
   Sparkles,
   Star,
+  Tag,
   Truck,
   User,
   X,
@@ -67,8 +64,6 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  // Which category is expanded in the mobile drawer (one at a time).
-  const [openCategory, setOpenCategory] = useState<string | null>(null);
   // Which category's mega menu is open in the desktop category bar.
   const [megaCategory, setMegaCategory] = useState<string | null>(null);
 
@@ -133,10 +128,13 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
     },
   ];
 
+  // The phone menu's main links — only the ones worth a row of their own.
   const drawerLinks = [
+    { label: dict.nav.home, href: "/", icon: Home },
+    { label: dict.nav.shop, href: "/product", icon: ShoppingBag },
     ...collectionLinks,
+    { label: dict.nav.brands, href: "/brands", icon: Tag },
     { label: dict.topbar.track_order, href: "/orders/track", icon: Truck },
-    { label: dict.topbar.help_center, href: "/help", icon: HelpCircle },
   ];
 
   return (
@@ -158,6 +156,11 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
         <BrandMenu
           brands={brands}
           label={dict.nav.brands}
+          topLabel={dict.nav.top_brands}
+          allLabel={dict.nav.all_brands}
+          viewAllLabel={dict.nav.view_all_brands}
+          searchLabel={dict.nav.search_brands}
+          noMatchLabel={dict.nav.brands_no_match}
           className="hidden sm:block"
         />
 
@@ -391,158 +394,48 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
           </button>
         </div>
 
+        {/* Kept short on purpose: the few places people actually go, then
+            the departments. Each row is one tap — nothing to fold open. */}
         <motion.nav
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3"
         >
-          <motion.div variants={staggerItem} className="grid grid-cols-2 gap-2">
-            <Link
-              href="/"
-              onClick={closeDrawer}
-              className="flex items-center gap-2 rounded-(--radius-lg) bg-(--color-bg) px-3 py-2.5 text-sm font-semibold text-(--color-dark) transition-colors active:bg-(--color-border)"
-            >
-              <Home className="h-[18px] w-[18px] shrink-0 text-(--color-primary)" />
-              {dict.nav.home}
-            </Link>
-            <Link
-              href="/product"
-              onClick={closeDrawer}
-              className="flex items-center gap-2 rounded-(--radius-lg) bg-(--color-bg) px-3 py-2.5 text-sm font-semibold text-(--color-dark) transition-colors active:bg-(--color-border)"
-            >
-              <ShoppingBag className="h-[18px] w-[18px] shrink-0 text-(--color-primary)" />
-              {dict.nav.shop}
-            </Link>
-          </motion.div>
-
-          <motion.p
-            variants={staggerItem}
-            className="mt-5 mb-2 px-1 text-xs font-semibold tracking-wider text-(--color-text-light) uppercase"
-          >
-            {dict.nav.all_categories}
-          </motion.p>
-
-          <ul className="flex list-none flex-col gap-1 ps-0">
-            {navCategories.map((category) => {
-              const isOpen = openCategory === category.label;
-              return (
-                <motion.li
-                  key={category.label}
-                  variants={staggerItem}
-                  className={`m-0 overflow-hidden rounded-(--radius-lg) border transition-colors duration-300 ${
-                    isOpen
-                      ? "border-(--color-primary)/25 bg-(--color-primary-faint)"
-                      : "border-transparent"
-                  }`}
-                >
-                  <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    onClick={() =>
-                      setOpenCategory(isOpen ? null : category.label)
-                    }
-                    className="flex w-full items-center gap-3 rounded-(--radius-lg) bg-transparent px-2.5 py-2.5 text-start text-sm font-medium text-(--color-dark)"
-                  >
-                    <span
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors duration-300 ${
-                        isOpen
-                          ? "bg-(--color-primary) text-white"
-                          : "bg-(--color-bg) text-(--color-primary)"
-                      }`}
-                    >
-                      <category.icon className="h-[18px] w-[18px] shrink-0" />
-                    </span>
-                    <span className="min-w-0 flex-1 truncate">
-                      {category.label}
-                    </span>
-                    <ChevronDown
-                      className={`h-4 w-4 shrink-0 text-(--color-text-muted) transition-transform duration-300 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.32, ease: easeSmooth }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex flex-col gap-3 px-3 pt-1 pb-3">
-                          {category.columns.map((column) => (
-                            <div key={column.title}>
-                              <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
-                                {column.title}
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {column.links.map((link) => (
-                                  <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={closeDrawer}
-                                    className="rounded-full border border-(--color-border) bg-(--color-surface) px-3 py-1.5 text-xs text-(--color-dark) transition-colors active:border-(--color-primary) active:text-(--color-primary)"
-                                  >
-                                    {link.label}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                          <Link
-                            href={category.href}
-                            onClick={closeDrawer}
-                            className="inline-flex w-fit items-center gap-1 text-xs font-semibold text-(--color-primary)"
-                          >
-                            {dict.common.view_all}
-                            <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-                          </Link>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.li>
-              );
-            })}
-          </ul>
-
-          {/* Brands — the header's Brands menu is hidden on phones. */}
-          {brands.length > 0 && (
-            <motion.div variants={staggerItem}>
-              <p className="mt-5 mb-2 px-1 text-xs font-semibold tracking-wider text-(--color-text-light) uppercase">
-                {dict.nav.brands}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {brands.map((brand) => (
-                  <Link
-                    key={brand._id}
-                    href={brandHref(brand)}
-                    onClick={closeDrawer}
-                    className="rounded-full border border-(--color-border) bg-(--color-surface) px-3 py-1.5 text-xs text-(--color-dark) transition-colors active:border-(--color-primary) active:text-(--color-primary)"
-                  >
-                    {brand.name}
-                  </Link>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          <motion.div
-            variants={staggerItem}
-            className="mt-4 flex flex-col border-t border-(--color-border) pt-3"
-          >
+          <motion.div variants={staggerItem} className="flex flex-col">
             {drawerLinks.map(({ label, href, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={closeDrawer}
-                className="flex items-center gap-3 rounded-(--radius-md) px-2.5 py-2.5 text-sm text-(--color-text-muted) transition-colors active:bg-(--color-bg)"
+                className="flex items-center gap-3 rounded-(--radius-md) px-2.5 py-3 text-sm font-medium text-(--color-dark) transition-colors active:bg-(--color-bg)"
               >
-                <Icon className="h-[18px] w-[18px] shrink-0" />
+                <Icon className="h-[18px] w-[18px] shrink-0 text-(--color-primary)" />
                 {label}
+              </Link>
+            ))}
+          </motion.div>
+
+          <motion.p
+            variants={staggerItem}
+            className="mt-3 mb-1 border-t border-(--color-border) px-2.5 pt-4 text-xs font-semibold tracking-wider text-(--color-text-light) uppercase"
+          >
+            {dict.nav.categories}
+          </motion.p>
+
+          <motion.div variants={staggerItem} className="flex flex-col">
+            {navCategories.map((category) => (
+              <Link
+                key={category.label}
+                href={category.href}
+                onClick={closeDrawer}
+                className="flex items-center gap-3 rounded-(--radius-md) px-2.5 py-2.5 text-sm text-(--color-dark) transition-colors active:bg-(--color-bg)"
+              >
+                <category.icon className="h-[18px] w-[18px] shrink-0 text-(--color-text-muted)" />
+                <span className="min-w-0 flex-1 truncate">
+                  {category.label}
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-(--color-text-light)" />
               </Link>
             ))}
           </motion.div>
@@ -579,23 +472,18 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {/* A link doesn't get <button>'s built-in flex layout, so it is
                     set here — otherwise the icon drops onto its own line. */}
                 {[
                   { href: "/account", label: dict.nav.profile, icon: User },
                   { href: "/orders", label: dict.nav.orders, icon: Package },
-                  {
-                    href: "/account/settings",
-                    label: dict.nav.settings,
-                    icon: Settings,
-                  },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={closeDrawer}
-                    className="flex h-10 items-center justify-center gap-2 rounded-(--radius-md) border border-(--color-border) bg-(--color-surface) text-sm font-semibold whitespace-nowrap text-(--color-dark) transition-colors hover:text-(--color-dark) active:bg-(--color-bg)"
+                    className="flex h-10 items-center justify-center gap-1.5 rounded-(--radius-md) border border-(--color-border) bg-(--color-surface) text-sm font-semibold whitespace-nowrap text-(--color-dark) transition-colors hover:text-(--color-dark) active:bg-(--color-bg)"
                   >
                     <Icon className="h-4 w-4 shrink-0 text-(--color-primary)" />
                     {label}
@@ -604,7 +492,8 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
                 <form action={signoutAction}>
                   <button
                     type="submit"
-                    className="flex h-10 w-full items-center justify-center gap-2 rounded-(--radius-md) border border-(--color-border) bg-(--color-surface) p-0 text-sm font-semibold whitespace-nowrap text-(--color-error) transition-colors active:bg-(--color-bg)"
+                    aria-label={dict.nav.sign_out}
+                    className="flex h-10 w-full items-center justify-center gap-1.5 rounded-(--radius-md) border border-(--color-border) bg-(--color-surface) p-0 text-sm font-semibold whitespace-nowrap text-(--color-error) transition-colors active:bg-(--color-bg)"
                   >
                     <LogOut className="h-4 w-4 shrink-0" />
                     {dict.nav.sign_out}

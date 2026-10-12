@@ -86,6 +86,18 @@ export interface Product {
   isActive: boolean;
   isFeatured: boolean;
   isTrending: boolean;
+  // Real figures from the shop's own reviews and orders (0 when there are
+  // none yet).
+  /** Mean rating of the approved reviews, to one decimal. */
+  averageRating?: number;
+  /** Approved reviews. */
+  reviewCount?: number;
+  /** Units ordered, in orders that weren't cancelled. */
+  soldCount?: number;
+  /** Hand-picked in the dashboard for the "Best Sellers" collection. */
+  isBestSeller?: boolean;
+  /** Sold with free delivery. */
+  isFreeDelivery?: boolean;
   // Auto-expires 30 days after being set — always reflects current status.
   isNewArrival: boolean;
   sortOrder: number;
@@ -105,10 +117,17 @@ export interface ListProductsParams {
   page?: number;
   limit?: number;
   category?: string;
+  /** Only products of this brand (brand id). */
+  brand?: string;
+  /** Price range in taka, on what the customer pays. */
+  minPrice?: number;
+  maxPrice?: number;
   search?: string;
   sort?: "default" | "price-low" | "price-high" | "name";
   isFeatured?: boolean;
   isTrending?: boolean;
+  isBestSeller?: boolean;
+  isFreeDelivery?: boolean;
   isNewArrival?: boolean;
 }
 
@@ -138,6 +157,13 @@ export async function listCatalogProductsAction(
     query.set("page", String(params.page || 1));
     query.set("limit", String(params.limit || 20));
     if (params.category) query.set("category", params.category);
+    if (params.brand) query.set("brand", params.brand);
+    if (params.minPrice !== undefined) {
+      query.set("minPrice", String(params.minPrice));
+    }
+    if (params.maxPrice !== undefined) {
+      query.set("maxPrice", String(params.maxPrice));
+    }
     if (params.search) query.set("search", params.search);
     if (params.sort) query.set("sort", params.sort);
     if (params.isFeatured !== undefined) {
@@ -145,6 +171,12 @@ export async function listCatalogProductsAction(
     }
     if (params.isTrending !== undefined) {
       query.set("isTrending", String(params.isTrending));
+    }
+    if (params.isBestSeller !== undefined) {
+      query.set("isBestSeller", String(params.isBestSeller));
+    }
+    if (params.isFreeDelivery !== undefined) {
+      query.set("isFreeDelivery", String(params.isFreeDelivery));
     }
     if (params.isNewArrival !== undefined) {
       query.set("isNewArrival", String(params.isNewArrival));
@@ -321,3 +353,26 @@ export type {
   SourcingItem,
   SourcingSearchResult,
 } from "./sourcing";
+
+/**
+ * The lowest and highest price among the products on sale — the two ends of
+ * the price slider. `null` when it can't be fetched.
+ */
+export async function getProductPriceRangeAction(): Promise<{
+  min: number;
+  max: number;
+} | null> {
+  try {
+    const res = await fetch(`${API}/products/price-range`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    const min = Number(body?.data?.min);
+    const max = Number(body?.data?.max);
+    return Number.isFinite(min) && Number.isFinite(max) ? { min, max } : null;
+  } catch {
+    return null;
+  }
+}

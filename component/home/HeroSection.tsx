@@ -30,9 +30,10 @@ interface HeroSlide {
   href: string;
 }
 
-// Banners live in /public/assets/herosilder. Each one fills the whole panel;
-// the banners are wider than the panel, so their left and right edges are
-// cropped.
+// Banners live in /public/assets/herosilder — wide strips, about 16:5. On
+// phones and tablets the panel takes that same shape, so the whole banner
+// shows. On desktop the panel is a fixed height beside the offer cards and
+// the banner fills it, its left and right edges cropped.
 const slides: HeroSlide[] = [
   {
     id: "bogo-madness",
@@ -54,7 +55,8 @@ const slides: HeroSlide[] = [
   },
 ];
 
-const PANEL_HEIGHT = "h-[390px] sm:h-[430px] lg:h-[460px]";
+// Desktop only: the banner and the offer cards share this height.
+const DESKTOP_HEIGHT = "lg:h-[460px]";
 const HERO_AUTOPLAY_MS = 4000;
 const OFFER_SLOTS = 2;
 const OFFER_BASE_MS = 2000;
@@ -196,7 +198,9 @@ export function HeroSection({ dict }: HeroSectionProps) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] lg:gap-5">
           {/* Banner carousel — pauses while pointed at or focused. */}
           <div
-            className={`relative isolate overflow-hidden rounded-(--radius-2xl) bg-black shadow-(--shadow-lg) ${PANEL_HEIGHT}`}
+            // Below desktop the height comes from the banner's own shape
+            // (16:5) rather than a fixed number, so nothing is cut off.
+            className={`relative isolate aspect-[16/5] overflow-hidden rounded-(--radius-xl) bg-black shadow-(--shadow-lg) sm:rounded-(--radius-2xl) lg:aspect-auto ${DESKTOP_HEIGHT}`}
             onMouseEnter={() => setIsHeroPaused(true)}
             onMouseLeave={() => setIsHeroPaused(false)}
             onFocusCapture={() => setIsHeroPaused(true)}
@@ -222,16 +226,17 @@ export function HeroSection({ dict }: HeroSectionProps) {
                     alt={activeHero.imageAlt}
                     fill
                     priority={activeSlide === 0}
-                    // Cropped to the panel's height, so the picture drawn is
-                    // wider than the panel itself.
-                    sizes="(min-width: 1024px) 115vw, 320vw"
+                    // Desktop crops to the panel's height, so the picture
+                    // drawn is wider than the panel; below that the banner
+                    // is simply as wide as the screen.
+                    sizes="(min-width: 1024px) 115vw, 100vw"
                     className="object-cover"
                   />
                 </Link>
               </motion.div>
             </AnimatePresence>
 
-            <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2">
+            <div className="absolute bottom-1.5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 sm:bottom-3">
               {slides.map((slide, index) => (
                 <button
                   key={slide.id}
@@ -250,8 +255,9 @@ export function HeroSection({ dict }: HeroSectionProps) {
             </div>
           </div>
 
-          {/* Offer cards — beside the banners on desktop, below them on phones. */}
-          <div className={`flex flex-col gap-3 ${PANEL_HEIGHT}`}>
+          {/* Offer cards — beside the banners on desktop only; phones and
+              tablets show just the banner. */}
+          <div className={`hidden flex-col gap-3 lg:flex ${DESKTOP_HEIGHT}`}>
             {Array.from({ length: OFFER_SLOTS }).map((_, slotIndex) => (
               <OfferSlot
                 key={slotIndex}

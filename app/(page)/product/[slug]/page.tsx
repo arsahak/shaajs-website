@@ -10,6 +10,7 @@ import {
   ProductGallery,
   type ProductMedia,
 } from "@/component/product/ProductGallery";
+import { ProductShare } from "@/component/product/ProductShare";
 import {
   ProductSelectionProvider,
   type ProductOptions,
@@ -277,20 +278,32 @@ export default async function ProductDetailPage({
 
           {/* Info */}
           <div>
-            {category && (
-              <span className="text-xs font-semibold tracking-wide text-(--color-primary) uppercase">
-                {category.name}
-              </span>
-            )}
-            <h1 className="mt-1.5 text-xl font-bold text-(--color-dark) sm:text-2xl">
-              {product.name}
-            </h1>
+            {/* The category on the left; the share button at the top right,
+                level with it and beside the title. */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                {category && (
+                  <span className="text-xs font-semibold tracking-wide text-(--color-primary) uppercase">
+                    {category.name}
+                  </span>
+                )}
+                <h1 className="mt-1.5 text-xl font-bold text-(--color-dark) sm:text-2xl">
+                  {product.name}
+                </h1>
+              </div>
+              <ProductShare title={product.name} />
+            </div>
 
             <div className="mt-2 flex items-center gap-2 text-sm text-(--color-text-muted)">
+              {/* Real figures: the approved reviews' average and count, and
+                  the units actually ordered — 0 when there are none yet. */}
               <span className="font-medium text-(--color-dark)">
-                ★ {product.rating}
+                ★ {reviewSummary.averageRating}
               </span>
-              <span>({product.reviews.toLocaleString()} reviews)</span>
+              <span>
+                ({reviewSummary.totalReviews.toLocaleString()}{" "}
+                {reviewSummary.totalReviews === 1 ? "review" : "reviews"})
+              </span>
               <span aria-hidden="true">·</span>
               <span>{product.sold}</span>
             </div>

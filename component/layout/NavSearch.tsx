@@ -268,7 +268,7 @@ export function NavSearch({
         {placeholder}
       </label>
 
-      <div className="flex h-[46px] w-full items-stretch overflow-hidden rounded-full border border-(--color-border) bg-(--color-bg) shadow-(--shadow-sm) transition-all focus-within:border-(--color-primary) focus-within:bg-(--color-surface) focus-within:shadow-[0_0_0_3px_var(--color-primary-faint)]">
+      <div className="flex h-[46px] w-full items-stretch overflow-hidden rounded-full border border-(--color-border) bg-white shadow-(--shadow-sm) transition-all focus-within:border-(--color-primary) focus-within:bg-(--color-surface) focus-within:shadow-[0_0_0_3px_var(--color-primary-faint)]">
         {/* Clicking the icon puts the cursor in the search field. */}
         <label
           htmlFor={`${idPrefix}-search`}

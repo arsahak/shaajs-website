@@ -100,10 +100,12 @@ export function ProductCard({
   return (
     <Link
       href={`/product/${product.id}`}
-      className="group block overflow-hidden rounded-(--radius-lg) border border-(--color-border) bg-(--color-surface) transition-all duration-300 hover:-translate-y-0.5 hover:border-(--color-primary)/30 hover:shadow-lg"
+      // Fills its grid cell and stacks as a column, so every card in a row is
+      // the same height whatever its title's length.
+      className="group flex h-full flex-col overflow-hidden rounded-(--radius-lg) border border-(--color-border) bg-(--color-surface) transition-all duration-300 hover:-translate-y-0.5 hover:border-(--color-primary)/30 hover:shadow-lg"
     >
       <div
-        className={`relative aspect-square overflow-hidden ${
+        className={`relative aspect-square shrink-0 overflow-hidden ${
           product.image ? "bg-white" : `bg-linear-to-br ${product.gradient}`
         }`}
       >
@@ -125,7 +127,12 @@ export function ProductCard({
             e.stopPropagation();
             toggleItem(product);
           }}
-          className="absolute end-2.5 top-2.5 z-10 p-0.5 text-pink-500 drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.25)] transition-transform hover:scale-115 active:scale-90"
+          // Out of sight until the card is hovered. It stays on show once the
+          // product is saved, when reached by keyboard, and on touch screens,
+          // which have no hover to reveal it.
+          className={`absolute end-2.5 top-2.5 z-10 p-0.5 text-pink-500 drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.25)] transition-[opacity,transform] duration-200 hover:scale-115 focus-visible:opacity-100 active:scale-90 [@media(hover:none)]:opacity-100 ${
+            wishlisted ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          }`}
         >
           <Heart
             size={22}
@@ -146,7 +153,7 @@ export function ProductCard({
         )}
       </div>
 
-      <div className="bg-(--color-bg) p-3">
+      <div className="flex flex-1 flex-col bg-(--color-bg) p-3">
         <div className="flex items-center gap-1 text-xs text-(--color-text-muted)">
           <Star
             size={13}
@@ -159,11 +166,16 @@ export function ProductCard({
           <span className="truncate">{product.sold}</span>
         </div>
 
-        <h3 className="mt-1.5 line-clamp-2 text-sm font-semibold text-(--color-dark)">
+        {/* Two lines at most, cut off with "…" — and two lines' room even for
+            a short name, so the price row lines up across the cards. */}
+        <h3
+          title={product.name}
+          className="mt-1.5 line-clamp-2 min-h-10 text-sm leading-5 font-semibold text-(--color-dark)"
+        >
           {product.name}
         </h3>
 
-        <div className="mt-2.5 flex items-center justify-between gap-2">
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
           <div className="flex min-w-0 flex-1 items-baseline gap-1.5 overflow-hidden whitespace-nowrap leading-tight">
             <span className="price shrink-0 text-base text-(--color-primary)">{formatPrice(product.price)}</span>
             {product.originalPrice && (
@@ -180,7 +192,7 @@ export function ProductCard({
               aria-label={`${addToCartLabel}: ${product.name}`}
               title={addToCartLabel}
               aria-pressed={isInCart}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center p-0 text-(--color-dark) transition-transform hover:scale-115 active:scale-90"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center p-0 text-(--color-dark) transition-[color,transform] hover:scale-115 hover:text-(--color-primary) active:scale-90"
             >
               <ShoppingCartMinus filled={isInCart} />
             </button>

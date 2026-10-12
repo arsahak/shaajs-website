@@ -44,11 +44,18 @@ export default async function PageLayout({
         };
   }
 
-  // The header's "Brands" menu — only the brands switched on in the dashboard.
-  const brandsRes = await listBrandsAction();
-  const brands = (brandsRes.ok && brandsRes.data ? brandsRes.data : []).filter(
-    (brand) => brand.isActive,
-  );
+  // The header's "Brands" menu shows the top brands picked in the dashboard
+  // (the full list lives on /brands — far too long to send with every page).
+  // Until some are picked, the first few brands stand in so it isn't empty.
+  const HEADER_BRAND_LIMIT = 12;
+  const activeBrands = async (top: boolean) => {
+    const res = await listBrandsAction({ top });
+    return (res.ok && res.data ? res.data : []).filter((b) => b.isActive);
+  };
+  let brands = await activeBrands(true);
+  if (brands.length === 0) {
+    brands = (await activeBrands(false)).slice(0, HEADER_BRAND_LIMIT);
+  }
 
   return (
     // Sign-in opens as a modal over whichever page the visitor is on.

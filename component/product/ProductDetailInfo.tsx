@@ -6,7 +6,6 @@ import { Check, Heart, Minus, Plus, RotateCcw, ShieldCheck, ShoppingCart, Truck,
 import { colorSwatches, type Product } from "@/app/data/products";
 import { cartLineKey, useCart } from "@/component/providers/CartProvider";
 import { useProductSelection } from "@/component/product/ProductSelection";
-import { ProductShare } from "@/component/product/ProductShare";
 import { formatPrice } from "@/app/utils/format-price";
 import { useWishlist } from "@/component/providers/WishlistProvider";
 
@@ -117,16 +116,23 @@ export function ProductDetailInfo({
     <div>
       <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         {priceRange ? (
-          <span className="price text-3xl">
+          <span className="price text-3xl text-(--color-primary-dark)">
             {formatPrice(priceRange.low)} – {formatPrice(priceRange.high)}
           </span>
         ) : (
-          <span className="price text-3xl">{formatPrice(price)}</span>
+          <span className="price text-3xl text-(--color-primary-dark)">{formatPrice(price)}</span>
         )}
         {!priceRange && originalPrice && (
           <>
             <span className="price-original">{formatPrice(originalPrice)}</span>
-            <span className="price-discount">-{discountPercent}%</span>
+            {/* What the discount is worth in taka, with the percentage as a
+                small note beside it. */}
+            <span className="inline-flex items-baseline gap-1.5 rounded-full bg-(--color-primary-faint) px-2.5 py-1 text-sm font-semibold text-(--color-primary)">
+              Save {formatPrice(originalPrice - price)}
+              <span className="text-xs font-medium opacity-75">
+                ({discountPercent}% off)
+              </span>
+            </span>
           </>
         )}
       </div>
@@ -328,21 +334,43 @@ export function ProductDetailInfo({
         </button>
       </div>
 
-      <ProductShare title={product.name} />
-
-      <div className="mt-6 grid grid-cols-1 gap-2.5 border-t border-(--color-border) pt-5 sm:grid-cols-3">
-        <span className="inline-flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-          <Truck size={14} className="text-(--color-primary)" />
-          Worldwide Shipping
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-          <ShieldCheck size={14} className="text-(--color-primary)" />
-          Buyer Protection
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-          <RotateCcw size={14} className="text-(--color-primary)" />
-          Easy Returns
-        </span>
+      {/* What the shopper can count on — three short promises, each with an
+          icon in a soft round badge. */}
+      <div className="mt-6 grid grid-cols-1 gap-3 border-t border-(--color-border) pt-5 sm:grid-cols-3">
+        {[
+          {
+            icon: Truck,
+            title: "Delivery All Over Bangladesh",
+            note: "To every district",
+          },
+          {
+            icon: ShieldCheck,
+            title: "100% Secure Payment",
+            note: "Pay safely, cash on delivery",
+          },
+          {
+            icon: RotateCcw,
+            title: "3-Day Easy Return",
+            note: "Hassle-free returns",
+          },
+        ].map(({ icon: Icon, title, note }) => (
+          <div
+            key={title}
+            className="flex items-center gap-3 rounded-(--radius-lg) border border-(--color-border) bg-(--color-surface) p-3"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--color-primary-faint) text-(--color-primary)">
+              <Icon aria-hidden="true" size={18} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm leading-snug font-semibold text-(--color-dark)">
+                {title}
+              </span>
+              <span className="block text-xs text-(--color-text-muted)">
+                {note}
+              </span>
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

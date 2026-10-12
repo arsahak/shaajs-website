@@ -17,7 +17,14 @@
     "shop": "Shop",
     "new_arrivals": "New Arrivals",
     "best_sellers": "Best Sellers",
-    "brands": "Brands"
+    "brands": "Brands",
+    "top_brands": "Top Brands",
+    "all_brands": "All Brands",
+    "view_all_brands": "View all brands",
+    "brands_subtitle": "Every brand we carry — our top brands first, then A to Z.",
+    "brands_empty": "No brands yet.",
+    "search_brands": "Search brands…",
+    "brands_no_match": "No brands match your search."
   },
   "common": {
     "search": "Search products, brands and more...",
