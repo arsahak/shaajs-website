@@ -2,6 +2,9 @@ import { ChevronRight, Heart } from "lucide-react";
 import Link from "next/link";
 import { getDictionary } from "@/app/dictionaries";
 import WishlistDetials from "@/component/wishlist/WishlistDetials";
+import { staticPageMetadata } from "@/app/data/seo";
+
+export const metadata = staticPageMetadata("/wish-list");
 
 export default async function WishlistPage() {
   const dict = await getDictionary();

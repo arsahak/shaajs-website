@@ -6,6 +6,9 @@ import { getMyOrdersAction } from "@/app/actions/order";
 import { getDictionary } from "@/app/dictionaries";
 import { AccountShell } from "@/component/customr_account/AccountShell";
 import OrderList from "@/component/customr_account/OrderList";
+import { staticPageMetadata } from "@/app/data/seo";
+
+export const metadata = staticPageMetadata("/orders");
 
 export default async function OrdersPage({
   searchParams,

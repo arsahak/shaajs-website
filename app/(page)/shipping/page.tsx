@@ -1,21 +1,13 @@
 import { Truck } from "lucide-react";
-import type { Metadata } from "next";
 // BD-ONLY: parked with the worldwide route panel — see ShippingContent.tsx.
 // import { headers } from "next/headers";
 import { getShippingCopy } from "@/app/data/shipping-copy";
 import { getDictionary } from "@/app/dictionaries";
 import { PageHero } from "@/component/common/PageHero";
 import { ShippingContent } from "@/component/shipping/ShippingContent";
+import { staticPageMetadata } from "@/app/data/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
-
-  return {
-    title: dict.footer.shipping_info,
-    description: getShippingCopy().description,
-    alternates: { canonical: "/shipping" },
-  };
-}
+export const metadata = staticPageMetadata("/shipping");
 
 export default async function ShippingPage() {
   const dict = await getDictionary();

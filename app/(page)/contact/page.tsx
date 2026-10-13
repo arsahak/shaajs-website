@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { PageHero } from "@/component/common/PageHero";
 import { ContactContent } from "@/component/contact/ContactContent";
 import { Mail } from "lucide-react";
-import type { Metadata } from "next";
+import { staticPageMetadata } from "@/app/data/seo";
 
 type Props = {
   searchParams: Promise<{ topic?: string }>;
@@ -13,15 +13,7 @@ type Props = {
 const DESCRIPTION =
   "Get in touch with Shaajs support or our seller team — we are here 24/7.";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
-
-  return {
-    title: dict.footer.contact,
-    description: DESCRIPTION,
-    alternates: { canonical: "/contact" },
-  };
-}
+export const metadata = staticPageMetadata("/contact");
 
 export default async function ContactPage({ searchParams }: Props) {
   const dict = await getDictionary();

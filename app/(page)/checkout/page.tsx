@@ -4,6 +4,9 @@ import { auth } from "@/auth";
 import { getDictionary } from "@/app/dictionaries";
 import { getMyProfile } from "@/app/actions/user";
 import CheckoutDetails from "@/component/checkout/CheckoutDetails";
+import { staticPageMetadata } from "@/app/data/seo";
+
+export const metadata = staticPageMetadata("/checkout");
 
 export default async function CheckoutPage() {
   const dict = await getDictionary();

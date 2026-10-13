@@ -13,6 +13,9 @@ import {
   prepareOverviewHtml,
   prepareSummaryHtml,
 } from "@/app/utils/description-html";
+import { formatPrice } from "@/app/utils/format-price";
+import { absoluteUrl, pageMetadata } from "@/app/utils/seo";
+import { JsonLd } from "@/component/seo/JsonLd";
 import {
   DESCRIPTION_CONTENT_STYLESHEET,
   DESCRIPTION_CONTENT_STYLESHEET_ID,
@@ -46,6 +49,12 @@ const badgeClass: Record<"new" | "hot" | "sale", string> = {
   sale: "badge-warning",
 };
 
+// What the customer pays: the discount price when it really is lower.
+const payablePrice = (product: { price: number; discountPrice?: number }) =>
+  product.discountPrice && product.discountPrice < product.price
+    ? product.discountPrice
+    : product.price;
+
 // Deterministic per-product, so repeat visits to the same product show the
 // same fallback gradient/icon instead of it changing on every render.
 function hashIndex(id: string): number {
@@ -56,9 +65,8 @@ function hashIndex(id: string): number {
   return Math.abs(hash);
 }
 
-// Product pages get their own title/description/image and URL — the layout's
-// defaults point og:url and canonical at the home page, which would make
-// Facebook/LinkedIn/X share previews show the home page instead.
+// A product's own title, description, picture and address, for search
+// results and for the preview card when its link is shared.
 export async function generateMetadata({
   params,
 }: {
@@ -70,36 +78,37 @@ export async function generateMetadata({
   if (!productRes.ok || !productRes.data) return {};
   const product = productRes.data;
 
-  const path = `/product/${product.slug}`;
+  const brand =
+    product.brand && typeof product.brand !== "string"
+      ? product.brand.name
+      : "";
+  const price = payablePrice(product);
   // The same clean-up the page's own text gets, so a label or blank line
   // pasted in with the description doesn't lead the search-result snippet.
-  const description = descriptionText(
+  const written = descriptionText(
     prepareSummaryHtml(product.shortDescription ?? ""),
-  )
-    .replace(/\s+/g, " ")
-    .slice(0, 160);
-  const image = product.featureImage || product.galleryImages?.[0];
-  const images = image ? [{ url: image, alt: product.title }] : undefined;
+  ).replace(/\s+/g, " ");
+  // What every product page can say, whatever was written for it: the
+  // price, that it is genuine, and how it is delivered.
+  const offer = `Buy ${product.title} at ${formatPrice(price)} from Shaajs — 100% authentic, cash on delivery and delivery all over Bangladesh.`;
+  // A short description is led with the offer; a missing one is replaced by it.
+  const description =
+    written.length >= 110 ? written : written ? `${offer} ${written}` : offer;
 
-  return {
-    title: product.title,
-    description: description || undefined,
-    alternates: { canonical: path },
-    openGraph: {
-      type: "website",
-      url: path,
-      title: product.title,
-      description: description || undefined,
-      siteName: "Shaajs",
-      ...(images && { images }),
-    },
-    twitter: {
-      card: images ? "summary_large_image" : "summary",
-      title: product.title,
-      description: description || undefined,
-      ...(image && { images: [image] }),
-    },
-  };
+  const image = product.featureImage || product.galleryImages?.[0];
+
+  return pageMetadata({
+    // "… Price in Bangladesh" is how products are searched for here; the
+    // brand leads when the title doesn't already start with it.
+    title: `${
+      brand && !product.title.toLowerCase().includes(brand.toLowerCase())
+        ? `${brand} `
+        : ""
+    }${product.title} — Price in Bangladesh`,
+    description,
+    path: `/product/${product.slug}`,
+    ...(image ? { image: { url: image, alt: product.title } } : {}),
+  });
 }
 
 export default async function ProductDetailPage({
@@ -198,8 +207,71 @@ export default async function ProductDetailPage({
 
   const FallbackIcon = resolveCatalogFallbackIcon(category, cardIndex);
 
+  // The product as search engines read it — name, pictures, price, rating —
+  // which is what lets a search result show the price and stars, and the
+  // trail of pages that leads here.
+  const productUrl = absoluteUrl(`/product/${rawProduct.slug}`);
+  const brandName =
+    rawProduct.brand && typeof rawProduct.brand !== "string"
+      ? rawProduct.brand.name
+      : undefined;
+  const breadcrumb = [
+    { name: dict.nav.home, url: absoluteUrl("/") },
+    ...(category
+      ? [{ name: category.name, url: absoluteUrl(`/category/${category.slug}`) }]
+      : []),
+    { name: rawProduct.title, url: productUrl },
+  ];
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": `${productUrl}#product`,
+        name: rawProduct.title,
+        url: productUrl,
+        ...(imageUrls.length > 0 ? { image: imageUrls } : {}),
+        description:
+          descriptionText(shortDescription).replace(/\s+/g, " ").slice(0, 500) ||
+          rawProduct.title,
+        ...(rawProduct.sku ? { sku: rawProduct.sku } : {}),
+        ...(brandName ? { brand: { "@type": "Brand", name: brandName } } : {}),
+        ...(category ? { category: category.name } : {}),
+        offers: {
+          "@type": "Offer",
+          url: productUrl,
+          priceCurrency: "BDT",
+          price: payablePrice(rawProduct),
+          availability: "https://schema.org/InStock",
+          itemCondition: "https://schema.org/NewCondition",
+          seller: { "@type": "Organization", name: "Shaajs" },
+        },
+        // Only with real reviews: a rating of nothing is not a rating.
+        ...(reviewSummary.totalReviews > 0
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: reviewSummary.averageRating,
+                reviewCount: reviewSummary.totalReviews,
+              },
+            }
+          : {}),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumb.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          item: item.url,
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="container py-8">
+      <JsonLd data={structuredData} />
       {/* React lifts these into the document's <head>: the styles the two
           descriptions are set with, and the fonts they use. */}
       <style href={DESCRIPTION_CONTENT_STYLESHEET_ID} precedence="default">

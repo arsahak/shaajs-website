@@ -5,37 +5,16 @@ import { ToastProvider } from "@/component/providers/ToastProvider";
 import { WishlistProvider } from "@/component/providers/WishlistProvider";
 import type { Metadata } from "next";
 import { DM_Sans, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { JsonLd } from "@/component/seo/JsonLd";
 import { getDictionary } from "./dictionaries";
+import {
+  DEFAULT_SHARE_IMAGE,
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+} from "./utils/seo";
 import "./globals.css";
 
-/**
- * The address this site is reached at — what canonical links and social-share
- * tags (og:url, og:image) are built from. In order:
- *
- * 1. NEXT_PUBLIC_SITE_URL, when it is set to a real address.
- * 2. On Vercel, the project's own domain: https://shaajs-website.vercel.app
- *    today, and the custom domain automatically once one is connected.
- * 3. https://www.shaajs.com.
- *
- * A localhost value is ignored on Vercel: left over from a local .env, it
- * would make every shared link point its picture at the visitor's own machine.
- */
-function resolveSiteUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const onVercel = Boolean(process.env.VERCEL);
-  const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(
-    configured ?? "",
-  );
-  if (configured && !(onVercel && isLocal)) return configured;
-
-  const vercelDomain = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (vercelDomain) return `https://${vercelDomain}`;
-
-  return "https://www.shaajs.com";
-}
-
-const SITE_URL = resolveSiteUrl().replace(/\/+$/, "");
-const SITE_NAME = "Shaajs";
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
@@ -57,11 +36,14 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+// The defaults every page starts from. Each page then describes itself with
+// pageMetadata() (app/utils/seo.ts) — its own title, description, canonical
+// address and share tags. There is deliberately no canonical here: one set on
+// the layout would be inherited by any page that set none of its own, telling
+// search engines that page is a copy of the home page.
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
-  const canonicalUrl = new URL("/", SITE_URL).toString();
-  // X/Twitter shows the same picture as everywhere else.
-  const socialImageUrl = new URL("/opengraph-image.png", SITE_URL).toString();
+  const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -71,31 +53,79 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${SITE_NAME}`,
     },
     description: dict.meta.description,
-    alternates: {
-      canonical: "/",
-    },
+    category: "shopping",
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
+    // Phone numbers and addresses in the text are not turned into links.
+    formatDetection: { telephone: false, address: false, email: false },
     openGraph: {
       type: "website",
-      url: canonicalUrl,
+      url: "/",
       title: dict.meta.title,
       description: dict.meta.description,
       siteName: SITE_NAME,
       locale: "en_US",
-      // The picture itself is app/opengraph-image.png (with its alt text
-      // beside it) — Next.js adds the og:image tags for that file on its own.
+      images: [DEFAULT_SHARE_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
       title: dict.meta.title,
       description: dict.meta.description,
-      images: [socialImageUrl],
+      images: [DEFAULT_SHARE_IMAGE.url],
     },
     robots: {
       index: true,
       follow: true,
+      // Search results may show a full snippet and a large picture.
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-snippet": -1,
+        "max-image-preview": "large",
+        "max-video-preview": -1,
+      },
     },
+    // Set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION to the code Google Search
+    // Console gives, to prove the site is yours.
+    ...(googleVerification
+      ? { verification: { google: googleVerification } }
+      : {}),
   };
 }
+
+// Who runs the site, and how to search it — read by search engines to label
+// the site in results and offer a search box under its listing.
+const SITE_STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: absoluteUrl("/assets/logo/color-logo.svg"),
+      description:
+        "Online beauty, fashion and lifestyle shop in Bangladesh — makeup, skincare, clothing, watches, footwear and gadgets, with cash on delivery.",
+      areaServed: { "@type": "Country", name: "Bangladesh" },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      inLanguage: "en",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/product?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
 
 export default async function RootLayout({
   children,
@@ -122,6 +152,7 @@ export default async function RootLayout({
           </CartProvider>
         </ThemeProvider>
         <ToastProvider />
+        <JsonLd data={SITE_STRUCTURED_DATA} />
       </body>
     </html>
   );

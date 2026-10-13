@@ -2,6 +2,9 @@ import { ChevronRight, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { getDictionary } from "@/app/dictionaries";
 import CartDetaits from "@/component/addtocart/CartDetaits";
+import { staticPageMetadata } from "@/app/data/seo";
+
+export const metadata = staticPageMetadata("/cart");
 
 export default async function CartPage() {
   const dict = await getDictionary();

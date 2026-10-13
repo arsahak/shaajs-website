@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { PageHero } from "@/component/common/PageHero";
 import { TrackOrderContent } from "@/component/orders/TrackOrderContent";
 import { PackageSearch } from "lucide-react";
-import type { Metadata } from "next";
+import { staticPageMetadata } from "@/app/data/seo";
 
 type Props = {
   searchParams: Promise<{ id?: string }>;
@@ -12,15 +12,7 @@ type Props = {
 const DESCRIPTION =
   "Enter your order number to see the latest status of your Shaajs order.";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
-
-  return {
-    title: dict.topbar.track_order,
-    description: DESCRIPTION,
-    alternates: { canonical: "/orders/track" },
-  };
-}
+export const metadata = staticPageMetadata("/orders/track");
 
 export default async function TrackOrderPage({ searchParams }: Props) {
   const dict = await getDictionary();

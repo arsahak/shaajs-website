@@ -1,7 +1,9 @@
 import { listCategoriesAction, type Category } from "@/app/actions/category";
 import { navCategories } from "@/app/data/categories";
 import { getDictionary } from "@/app/dictionaries";
+import { absoluteUrl, pageMetadata } from "@/app/utils/seo";
 import { PageHero } from "@/component/common/PageHero";
+import { JsonLd } from "@/component/seo/JsonLd";
 import { ProductGrid } from "@/component/product/ProductGrid";
 import { Package, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
@@ -56,11 +58,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = await resolveCategory(slug.join("/"));
   if (!category) notFound();
 
-  return {
-    title: category.title,
-    description: `Shop ${category.title} from trusted sellers on Shaajs.`,
-    alternates: { canonical: `/category/${slug.join("/")}` },
-  };
+  return pageMetadata({
+    // "… Price in Bangladesh" is how products are searched for here.
+    title: `${category.title} — Buy Online at Best Price in Bangladesh`,
+    description: `Shop ${category.title} online at Shaajs — 100% authentic products from trusted brands, best prices, cash on delivery and fast delivery all over Bangladesh.`,
+    path: `/category/${slug.join("/")}`,
+  });
 }
 
 export default async function CategoryPage({ params }: Props) {
@@ -72,6 +75,26 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <>
+      {/* The trail of pages that leads here, for search results. */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { name: dict.nav.home, url: absoluteUrl("/") },
+            { name: "All Products", url: absoluteUrl("/product") },
+            {
+              name: category.title,
+              url: absoluteUrl(`/category/${slug.join("/")}`),
+            },
+          ].map((item, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: item.name,
+            item: item.url,
+          })),
+        }}
+      />
       <PageHero
         title={category.title}
         homeLabel={dict.nav.home}

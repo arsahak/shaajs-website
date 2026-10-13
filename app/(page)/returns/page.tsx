@@ -1,19 +1,11 @@
 import { RotateCcw } from "lucide-react";
-import type { Metadata } from "next";
 import { getReturnsCopy } from "@/app/data/returns-copy";
 import { getDictionary } from "@/app/dictionaries";
 import { PageHero } from "@/component/common/PageHero";
 import { ReturnsContent } from "@/component/returns/ReturnsContent";
+import { staticPageMetadata } from "@/app/data/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
-
-  return {
-    title: dict.footer.returns,
-    description: getReturnsCopy().description,
-    alternates: { canonical: "/returns" },
-  };
-}
+export const metadata = staticPageMetadata("/returns");
 
 export default async function ReturnsPage() {
   const dict = await getDictionary();

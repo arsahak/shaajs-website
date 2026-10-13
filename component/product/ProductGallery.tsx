@@ -237,12 +237,14 @@ export function ProductGallery({
 
     // Swallows the click a drag ends with, so letting go over a thumbnail
     // doesn't also select it.
-    const swallowClick = (event: MouseEvent) => {
+    // (globalThis.MouseEvent: these listen on the element itself, so they get
+    // the browser's own event — in this file "MouseEvent" alone is React's.)
+    const swallowClick = (event: globalThis.MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
     };
 
-    const onMouseDown = (event: MouseEvent) => {
+    const onMouseDown = (event: globalThis.MouseEvent) => {
       if (event.button !== 0) return;
       pressed = true;
       dragging = false;
@@ -252,7 +254,7 @@ export function ProductGallery({
       startTop = strip.scrollTop;
     };
 
-    const onMouseMove = (event: MouseEvent) => {
+    const onMouseMove = (event: globalThis.MouseEvent) => {
       if (!pressed) return;
       const movedX = event.clientX - startX;
       const movedY = event.clientY - startY;

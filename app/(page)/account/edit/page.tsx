@@ -4,12 +4,9 @@ import { PageHero } from "@/component/common/PageHero";
 import { AccountShell } from "@/component/customr_account/AccountShell";
 import { EditProfileForm } from "@/component/customr_account/EditProfileForm";
 import { Pencil } from "lucide-react";
-import type { Metadata } from "next";
+import { staticPageMetadata } from "@/app/data/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
-  return { title: dict.account.edit_profile, robots: { index: false } };
-}
+export const metadata = staticPageMetadata("/account/edit");
 
 export default async function EditProfilePage() {
   const dict = await getDictionary();

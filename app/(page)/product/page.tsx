@@ -1,7 +1,11 @@
 import { ChevronRight, Package } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { cache } from "react";
 import { listBestForAction } from "@/app/actions/bestFor";
+import { COLLECTION_SEO, staticPageMetadata } from "@/app/data/seo";
 import { getDictionary } from "@/app/dictionaries";
+import { pageMetadata } from "@/app/utils/seo";
 import {
   ProductGrid,
   type ProductCollection,
@@ -16,45 +20,95 @@ const COLLECTION_TITLES: Record<ProductCollection, string> = {
   "new-arrivals": "New Arrivals",
 };
 
-export default async function ProductPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    q?: string | string[];
-    collection?: string | string[];
-    bestFor?: string | string[];
-  }>;
-}) {
-  const dict = await getDictionary();
-  // The navbar search lands here as /product?q=…
+interface ListingSearchParams {
+  q?: string | string[];
+  collection?: string | string[];
+  bestFor?: string | string[];
+}
+
+// The homepage's "best for" cards land here as /product?bestFor=<slug> — an
+// option ("skin-type-dry") or a whole group ("skin-type"). A slug that
+// matches nothing gives undefined, and the page shows every product.
+// Cached per request, so the metadata and the page share one lookup.
+const findBestFor = cache(async (slug: string) => {
+  if (!slug) return undefined;
+  const res = await listBestForAction();
+  const entries = res.ok ? (res.data ?? []) : [];
+  const entry = entries.find((item) => item.slug === slug);
+  if (!entry) return undefined;
+  const group = entry.parent
+    ? entries.find((item) => item._id === entry.parent)
+    : undefined;
+  return {
+    id: entry._id,
+    slug: entry.slug,
+    name: entry.name,
+    groupName: group?.name,
+    // "Skin Type: Dry" — an option's name alone ("Dry") says too little.
+    title: group ? `${group.name}: ${entry.name}` : entry.name,
+  };
+});
+
+// What the address asks the list to show: a search, a collection, a "best
+// for" entry — or nothing in particular.
+const readListing = async (searchParams: Promise<ListingSearchParams>) => {
   const { q, collection: rawCollection, bestFor: rawBestFor } =
     await searchParams;
+  // The navbar search lands here as /product?q=…
   const search = (typeof q === "string" ? q : "").trim().slice(0, 100);
   const collection =
     typeof rawCollection === "string" && rawCollection in COLLECTION_TITLES
       ? (rawCollection as ProductCollection)
       : undefined;
+  const bestFor = await findBestFor(
+    typeof rawBestFor === "string" ? rawBestFor : "",
+  );
+  return { search, collection, bestFor };
+};
 
-  // The homepage's "best for" cards land here as /product?bestFor=<slug> —
-  // an option ("skin-type-dry") or a whole group ("skin-type"). A slug that
-  // matches nothing is ignored and the page shows every product.
-  const bestForSlug = typeof rawBestFor === "string" ? rawBestFor : "";
-  let bestFor: { id: string; title: string } | undefined;
-  if (bestForSlug) {
-    const res = await listBestForAction();
-    const entries = res.ok ? (res.data ?? []) : [];
-    const entry = entries.find((item) => item.slug === bestForSlug);
-    if (entry) {
-      const group = entry.parent
-        ? entries.find((item) => item._id === entry.parent)
-        : undefined;
-      bestFor = {
-        id: entry._id,
-        // "Skin Type: Dry" — an option's name alone ("Dry") says too little.
-        title: group ? `${group.name}: ${entry.name}` : entry.name,
-      };
-    }
+// Each way of opening the list is its own page to a search engine, with its
+// own title, description and address — except a search, whose results only
+// repeat products that have pages of their own.
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<ListingSearchParams>;
+}): Promise<Metadata> {
+  const { search, collection, bestFor } = await readListing(searchParams);
+
+  if (search) {
+    return pageMetadata({
+      title: `Search results for "${search}"`,
+      description: `Products matching "${search}" at Shaajs — makeup, skincare, fashion and lifestyle products with cash on delivery all over Bangladesh.`,
+      path: "/product",
+      noindex: true,
+    });
   }
+  if (bestFor) {
+    return pageMetadata({
+      title: `${bestFor.title} — Shop Online in Bangladesh`,
+      description: bestFor.groupName
+        ? `Shop products picked for ${bestFor.name} (${bestFor.groupName}) at Shaajs — 100% authentic, best prices and cash on delivery all over Bangladesh.`
+        : `Shop products by ${bestFor.name} at Shaajs — 100% authentic, best prices and cash on delivery all over Bangladesh.`,
+      path: `/product?bestFor=${encodeURIComponent(bestFor.slug)}`,
+    });
+  }
+  if (collection) {
+    return pageMetadata({
+      ...COLLECTION_SEO[collection],
+      path: `/product?collection=${collection}`,
+    });
+  }
+  return staticPageMetadata("/product");
+}
+
+export default async function ProductPage({
+  searchParams,
+}: {
+  searchParams: Promise<ListingSearchParams>;
+}) {
+  const dict = await getDictionary();
+  const { search, collection, bestFor } = await readListing(searchParams);
 
   const title =
     bestFor?.title ??

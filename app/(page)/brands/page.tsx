@@ -3,16 +3,9 @@ import { getDictionary } from "@/app/dictionaries";
 import { BrandsDirectory } from "@/component/brands/BrandsDirectory";
 import { PageHero } from "@/component/common/PageHero";
 import { Tags } from "lucide-react";
-import type { Metadata } from "next";
+import { staticPageMetadata } from "@/app/data/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
-  return {
-    title: dict.nav.all_brands,
-    description: dict.nav.brands_subtitle,
-    alternates: { canonical: "/brands" },
-  };
-}
+export const metadata = staticPageMetadata("/brands");
 
 /**
  * Every brand the store carries: the top brands first, then all brands under

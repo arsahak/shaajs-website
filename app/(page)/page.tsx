@@ -5,6 +5,9 @@ import { HeroSection } from "@/component/home/HeroSection";
 import { NewArrivals } from "@/component/home/NewArrivals";
 import SecureShipping from "@/component/home/SecureShipping";
 import { SellerBanner } from "@/component/home/SellerBanner";
+import { staticPageMetadata } from "@/app/data/seo";
+
+export const metadata = staticPageMetadata("/");
 
 export default async function Home() {
   const dict = await getDictionary();
