@@ -140,7 +140,7 @@ export async function NewArrivals({ dict }: NewArrivalsProps) {
     }));
 
   return (
-    <section className="py-8 sm:py-10">
+    <section className="pt-6 pb-8 sm:pt-8 sm:pb-10 lg:pt-10">
       <div className="container">
         <FadeIn className="flex items-end justify-between gap-4">
           <h2 className="section-title">{dict.home.new_arrivals}</h2>

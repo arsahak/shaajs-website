@@ -2,8 +2,8 @@
 
 import { easeSmooth } from "@/component/motion/variants";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { BsArrowRight } from "react-icons/bs";
 import { useEffect, useState } from "react";
 
 export interface Announcement {
@@ -14,7 +14,7 @@ export interface Announcement {
 const ROTATE_MS = 4000;
 
 const arrowClass =
-  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-transparent p-0 text-white/60 transition-colors hover:bg-white/10 hover:text-white";
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/20 hover:text-white";
 
 /**
  * The strip above the header: offers and notices that slide through one at a
@@ -37,8 +37,6 @@ export function AnnouncementBar({ items }: { items: Announcement[] }) {
   if (items.length === 0) return null;
 
   const item = items[index % items.length];
-  const step = (by: -1 | 1) =>
-    setIndex((current) => (current + by + items.length) % items.length);
 
   return (
     <div
@@ -47,16 +45,8 @@ export function AnnouncementBar({ items }: { items: Announcement[] }) {
       onMouseLeave={() => setPaused(false)}
     >
       <div className="container flex h-11 items-center gap-2">
-        {items.length > 1 && (
-          <button
-            type="button"
-            aria-label="Previous offer"
-            onClick={() => step(-1)}
-            className={arrowClass}
-          >
-            <ChevronLeft size={16} />
-          </button>
-        )}
+        {/* Empty, as wide as the arrow on the right, so the text stays centred. */}
+        <span aria-hidden="true" className="h-7 w-7 shrink-0" />
 
         <div className="relative h-full min-w-0 flex-1 overflow-hidden">
           <AnimatePresence initial={false} mode="wait">
@@ -78,16 +68,10 @@ export function AnnouncementBar({ items }: { items: Announcement[] }) {
           </AnimatePresence>
         </div>
 
-        {items.length > 1 && (
-          <button
-            type="button"
-            aria-label="Next offer"
-            onClick={() => step(1)}
-            className={arrowClass}
-          >
-            <ChevronRight size={16} />
-          </button>
-        )}
+        {/* The one arrow: opens the offer that is showing. */}
+        <Link href={item.href} aria-label={item.text} className={arrowClass}>
+          <BsArrowRight aria-hidden="true" size={14} />
+        </Link>
       </div>
     </div>
   );
