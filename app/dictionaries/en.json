@@ -93,15 +93,15 @@
       "lifestyle_image_alt": "Fashion and clothing products available on Shaajs"
     },
     "offers": {
-      "flash_label": "Flash Sale",
-      "flash_title": "Electronics & Gadgets",
-      "flash_discount": "Up to 45% off",
-      "clearance_label": "Clearance",
-      "clearance_title": "Home & Living",
-      "clearance_discount": "Up to 30% off",
-      "bundle_label": "Bundle Deal",
-      "bundle_title": "Beauty & Health",
-      "bundle_discount": "Buy 1, get 1 free"
+      "flash_label": "Skincare",
+      "flash_title": "Serums, Creams & Face Masks",
+      "flash_discount": "Shop skincare deals",
+      "clearance_label": "Makeup",
+      "clearance_title": "Lips, Eyes & Face",
+      "clearance_discount": "Shop makeup deals",
+      "bundle_label": "New Arrivals",
+      "bundle_title": "Just Landed at Shaajs",
+      "bundle_discount": "See what's new"
     },
     "featured": "Featured Products",
     "categories": "Top Category",
