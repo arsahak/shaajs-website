@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
 import type { ProductReview } from "@/app/actions/products";
+import { descriptionContentClass } from "@/app/utils/description-styles";
 
 interface ProductTabsProps {
   overviewHtml: string;
@@ -79,7 +80,7 @@ export function ProductTabs({
       {tab === "description" && hasOverview && (
         <div role="tabpanel" className="mt-6">
           <div
-            className="rich-content"
+            className={descriptionContentClass("overview")}
             dangerouslySetInnerHTML={{ __html: overviewHtml }}
           />
         </div>

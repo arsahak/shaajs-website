@@ -24,6 +24,8 @@ interface BrandMenuProps {
   viewAllLabel: string;
   searchLabel: string;
   noMatchLabel: string;
+  /** What the panel's Close button reads. */
+  closeLabel?: string;
   className?: string;
 }
 
@@ -72,6 +74,7 @@ export function BrandMenu({
   viewAllLabel,
   searchLabel,
   noMatchLabel,
+  closeLabel = "Close",
   className = "",
 }: BrandMenuProps) {
   const [open, setOpen] = useState(false);
@@ -133,7 +136,12 @@ export function BrandMenu({
   return (
     // Not `relative`: the panel hangs from the header itself, so it can run
     // the header's full width like the category menu does.
-    <div className={className}>
+    <div
+      className={className}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) close();
+      }}
+    >
       <button
         type="button"
         aria-expanded={open}
@@ -288,9 +296,21 @@ export function BrandMenu({
 
           {/* 3 — the top brands' logos. */}
           <div className="flex h-[26rem] max-h-[calc(100dvh-14rem)] flex-col">
-            <p className="mb-4 border-b border-(--color-border) pb-2 text-center text-base font-semibold tracking-wide text-(--color-dark) uppercase">
-              {topLabel}
-            </p>
+            {/* The heading, with the panel's Close button at its right end —
+                the panel's top right corner. */}
+            <div className="relative mb-4 border-b border-(--color-border) pb-2">
+              <p className="text-center text-base font-semibold tracking-wide text-(--color-dark) uppercase">
+                {topLabel}
+              </p>
+              <button
+                type="button"
+                onClick={close}
+                className="absolute end-0 top-1/2 flex -translate-y-[calc(50%+0.25rem)] items-center gap-1 rounded-(--radius-pill) border border-(--color-border) bg-transparent px-2.5 py-1.5 text-xs font-semibold text-(--color-text-muted) transition-colors hover:border-(--color-primary) hover:text-(--color-primary)"
+              >
+                <X aria-hidden="true" size={14} />
+                {closeLabel}
+              </button>
+            </div>
             <div className="grid flex-1 grid-cols-3 content-start gap-3 overflow-y-auto lg:grid-cols-4">
               {topBrands.map((brand) => (
                 <Link

@@ -119,6 +119,11 @@ export interface ListProductsParams {
   category?: string;
   /** Only products of this brand (brand id). */
   brand?: string;
+  /**
+   * Only products tagged with this Best For entry (its id) — an option, or a
+   * group, which stands for every option in it.
+   */
+  bestFor?: string;
   /** Price range in taka, on what the customer pays. */
   minPrice?: number;
   maxPrice?: number;
@@ -158,6 +163,7 @@ export async function listCatalogProductsAction(
     query.set("limit", String(params.limit || 20));
     if (params.category) query.set("category", params.category);
     if (params.brand) query.set("brand", params.brand);
+    if (params.bestFor) query.set("bestFor", params.bestFor);
     if (params.minPrice !== undefined) {
       query.set("minPrice", String(params.minPrice));
     }

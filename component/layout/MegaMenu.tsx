@@ -52,19 +52,39 @@ export function MegaMenu({ category, show, onNavigate }: MegaMenuProps) {
           ))}
         </div>
 
-        <div className="flex flex-col justify-between rounded-(--radius-lg) bg-(--color-primary-faint) p-6">
-          <div>
-            <span className="badge badge-primary">{category.label}</span>
-            <h4 className="mt-3">{category.promo.title}</h4>
-            <p className="mt-2 text-sm text-(--color-text-muted)">{category.promo.subtitle}</p>
-          </div>
+        {/* The category's promotion: a brand-colored card with its own
+            call to action. It keeps its own height rather than stretching to
+            a tall menu's, and stays in view while a long menu scrolls. */}
+        <div className="relative isolate flex min-h-60 flex-col self-start overflow-hidden rounded-(--radius-xl) bg-linear-to-br from-(--color-primary) to-(--color-primary-dark) p-6 text-white shadow-lg lg:sticky lg:top-8">
+          {/* Soft circles, for depth. */}
+          <span
+            aria-hidden="true"
+            className="absolute -top-12 -right-10 -z-10 h-40 w-40 rounded-full bg-white/10"
+          />
+          <span
+            aria-hidden="true"
+            className="absolute -bottom-16 -left-10 -z-10 h-44 w-44 rounded-full bg-white/10"
+          />
+
+          <span className="w-fit rounded-(--radius-pill) bg-white/20 px-2.5 py-1 text-[11px] leading-none font-semibold tracking-wide text-white uppercase">
+            {category.label}
+          </span>
+          <h4 className="mt-4 text-xl leading-snug font-bold text-white">
+            {category.promo.title}
+          </h4>
+          <p className="mt-2 text-sm leading-relaxed text-white/85">
+            {category.promo.subtitle}
+          </p>
           <Link
             href={category.promo.href}
             onClick={onNavigate}
-            className="btn-primary btn-sm btn-pill mt-6 w-fit"
+            className="group/cta mt-auto inline-flex w-fit items-center gap-2 rounded-(--radius-pill) bg-white px-4 py-2 text-sm font-semibold text-(--color-primary) shadow-sm transition-colors hover:bg-white/90 hover:text-(--color-primary-dark)"
           >
             {category.promo.cta}
-            <ArrowRight size={16} />
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover/cta:translate-x-0.5"
+            />
           </Link>
         </div>
       </div>

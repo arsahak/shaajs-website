@@ -219,6 +219,84 @@ export function ProductGallery({
     });
   }, [activeIndex]);
 
+  // The thumbnail strip has no scrollbar, so with a mouse it is dragged: press
+  // on it and pull — sideways on small screens, up and down on desktop. A
+  // press that doesn't move still picks the thumbnail under it. (A finger
+  // already scrolls it without any of this.)
+  const hasThumbnails = count > 0;
+  useEffect(() => {
+    const strip = thumbsRef.current;
+    if (!hasThumbnails || !strip) return;
+
+    let pressed = false;
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+
+    // Swallows the click a drag ends with, so letting go over a thumbnail
+    // doesn't also select it.
+    const swallowClick = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const onMouseDown = (event: MouseEvent) => {
+      if (event.button !== 0) return;
+      pressed = true;
+      dragging = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      startLeft = strip.scrollLeft;
+      startTop = strip.scrollTop;
+    };
+
+    const onMouseMove = (event: MouseEvent) => {
+      if (!pressed) return;
+      const movedX = event.clientX - startX;
+      const movedY = event.clientY - startY;
+      if (!dragging && Math.hypot(movedX, movedY) < DRAG_THRESHOLD) return;
+      if (!dragging) {
+        dragging = true;
+        // Follow the mouse exactly while it is held: no glide, no snapping.
+        strip.style.scrollBehavior = "auto";
+        strip.style.scrollSnapType = "none";
+        strip.style.cursor = "grabbing";
+      }
+      event.preventDefault();
+      strip.scrollLeft = startLeft - movedX;
+      strip.scrollTop = startTop - movedY;
+    };
+
+    const onMouseUp = () => {
+      if (!pressed) return;
+      pressed = false;
+      if (!dragging) return;
+      dragging = false;
+      strip.style.scrollBehavior = "";
+      strip.style.scrollSnapType = "";
+      strip.style.cursor = "";
+      strip.addEventListener("click", swallowClick, true);
+      // The click, if there is one, comes right after this mouseup.
+      setTimeout(() => strip.removeEventListener("click", swallowClick, true));
+    };
+
+    // Without this the browser would start dragging the picture itself.
+    const onDragStart = (event: DragEvent) => event.preventDefault();
+
+    strip.addEventListener("mousedown", onMouseDown);
+    strip.addEventListener("dragstart", onDragStart);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      strip.removeEventListener("mousedown", onMouseDown);
+      strip.removeEventListener("dragstart", onDragStart);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [hasThumbnails]);
+
   // After sliding onto the copy of the first slide, jump back to the real one
   // with the transition off, then turn it back on for the next move.
   const handleTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
@@ -460,7 +538,9 @@ export function ProductGallery({
               // A few thumbnails sit centred under the picture; more than fit
               // scroll, from the first one, with a smooth glide and a gentle
               // stop on each thumbnail.
-              className="relative flex snap-x snap-proximity gap-2.5 overflow-x-auto scroll-smooth pb-1 [scrollbar-width:none] max-lg:mx-auto max-lg:w-fit max-lg:max-w-full lg:absolute lg:inset-0 lg:snap-y lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:pb-0 lg:[scrollbar-width:thin] motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden lg:[&::-webkit-scrollbar]:block"
+              // No scrollbar at any size: the strip is moved by swiping, by
+              // dragging it with the mouse, or with the wheel.
+              className="relative flex snap-x snap-proximity gap-2.5 overflow-x-auto scroll-smooth pb-1 [scrollbar-width:none] max-lg:mx-auto max-lg:w-fit max-lg:max-w-full lg:absolute lg:inset-0 lg:snap-y lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:pb-0 motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden"
             >
               {media.map((item, index) => {
                 const isActive = index === activeIndex;

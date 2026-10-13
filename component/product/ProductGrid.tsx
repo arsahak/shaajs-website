@@ -46,6 +46,11 @@ interface ProductGridProps {
   initialSearch?: string;
   /** Opens the grid on one collection (/product?collection=…). */
   collection?: ProductCollection;
+  /**
+   * Shows only products tagged with this Best For entry (its id) — the
+   * homepage's "best for" cards, /product?bestFor=….
+   */
+  bestForId?: string;
 }
 
 export type ProductCollection =
@@ -116,6 +121,8 @@ interface Filters {
   categoryId: string | null;
   collection: ProductCollection | null;
   brandId: string | null;
+  // Set by the page and kept for as long as the grid is on it.
+  bestForId: string | null;
   minPrice: number | null;
   maxPrice: number | null;
   search: string;
@@ -128,6 +135,7 @@ const toParams = (filters: Filters, page: number): ListProductsParams => ({
   sort: SORT_PARAM[filters.sort],
   category: filters.categoryId ?? undefined,
   brand: filters.brandId ?? undefined,
+  bestFor: filters.bestForId ?? undefined,
   minPrice: filters.minPrice ?? undefined,
   maxPrice: filters.maxPrice ?? undefined,
   search: filters.search || undefined,
@@ -369,6 +377,7 @@ export function ProductGrid({
   initialCategory,
   initialSearch = "",
   collection,
+  bestForId,
 }: ProductGridProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -393,6 +402,7 @@ export function ProductGrid({
     categoryId: initialCategory?.id ?? null,
     collection: collection ?? null,
     brandId: null,
+    bestForId: bestForId ?? null,
     minPrice: null,
     maxPrice: null,
     search: initialSearch,

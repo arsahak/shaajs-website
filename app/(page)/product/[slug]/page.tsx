@@ -4,6 +4,19 @@ import {
   listProductReviewsAction,
 } from "@/app/actions/products";
 import { getDictionary } from "@/app/dictionaries";
+import {
+  descriptionFontStylesheet,
+  descriptionFontsUsed,
+} from "@/app/utils/description-fonts";
+import {
+  descriptionText,
+  prepareOverviewHtml,
+  prepareSummaryHtml,
+} from "@/app/utils/description-html";
+import {
+  DESCRIPTION_CONTENT_STYLESHEET,
+  DESCRIPTION_CONTENT_STYLESHEET_ID,
+} from "@/app/utils/description-styles";
 import { ProductCard } from "@/component/product/ProductCard";
 import { ProductDetailInfo } from "@/component/product/ProductDetailInfo";
 import {
@@ -33,42 +46,6 @@ const badgeClass: Record<"new" | "hot" | "sale", string> = {
   sale: "badge-warning",
 };
 
-const HTML_ENTITIES: Record<string, string> = {
-  "&nbsp;": " ",
-  "&amp;": "&",
-  "&lt;": "<",
-  "&gt;": ">",
-  "&quot;": '"',
-  "&#39;": "'",
-  "&apos;": "'",
-};
-
-// Converts the rich-text editor's HTML into plain text that still previews
-// the author's structure — list items become "• " bullet lines and
-// paragraphs/line breaks stay on their own line — instead of flattening
-// everything into one run-on line.
-function stripHtml(html: string): string {
-  return (
-    html
-      .replace(/<li[^>]*>/gi, "\n• ")
-      .replace(/<\/li>/gi, "")
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/(p|div|h[1-6]|tr|ul|ol|table)>/gi, "\n")
-      .replace(/<[^>]*>/g, "")
-      .replace(
-        /&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;|&apos;/g,
-        (m) => HTML_ENTITIES[m],
-      )
-      .split("\n")
-      .map((line) => line.replace(/[ \t]+/g, " ").trim())
-      // No blank lines between blocks — paragraphs and bullets stack tight,
-      // one per line, instead of leaving a gap-sized empty line between them.
-      .filter((line) => line !== "")
-      .join("\n")
-      .trim()
-  );
-}
-
 // Deterministic per-product, so repeat visits to the same product show the
 // same fallback gradient/icon instead of it changing on every render.
 function hashIndex(id: string): number {
@@ -94,7 +71,11 @@ export async function generateMetadata({
   const product = productRes.data;
 
   const path = `/product/${product.slug}`;
-  const description = stripHtml(product.shortDescription ?? "")
+  // The same clean-up the page's own text gets, so a label or blank line
+  // pasted in with the description doesn't lead the search-result snippet.
+  const description = descriptionText(
+    prepareSummaryHtml(product.shortDescription ?? ""),
+  )
     .replace(/\s+/g, " ")
     .slice(0, 160);
   const image = product.featureImage || product.galleryImages?.[0];
@@ -148,9 +129,23 @@ export default async function ProductDetailPage({
     ? (reviewsRes.data?.summary ?? { averageRating: 0, totalReviews: 0 })
     : { averageRating: 0, totalReviews: 0 };
 
-  // shortDescription comes from the dashboard's rich-text editor as HTML —
-  // strip tags/entities down to plain text for this compact detail-page blurb.
-  const shortDescription = stripHtml(rawProduct.shortDescription ?? "");
+  // Both descriptions come from the dashboard's rich-text editors as HTML,
+  // and are shown as written — titles, lists, fonts, sizes, colors, icons —
+  // once cleaned of what pasted text drags in with it. The short one is text
+  // only; the overview keeps its pictures, videos and tables.
+  const shortDescription = prepareSummaryHtml(
+    rawProduct.shortDescription ?? "",
+  );
+  const overview = prepareOverviewHtml(rawProduct.overview ?? "");
+  // The fonts the two descriptions are set in — the site's own three are
+  // already on the page; any other is loaded here, and only on this
+  // product's page.
+  const descriptionFonts = [
+    ...new Set([
+      ...descriptionFontsUsed(shortDescription),
+      ...descriptionFontsUsed(overview),
+    ]),
+  ].filter((font) => font.google && !font.siteVariable);
 
   // Gallery order: feature image first, then the product video (if any),
   // then the remaining gallery images, de-duplicated. The gallery autoplays
@@ -205,6 +200,19 @@ export default async function ProductDetailPage({
 
   return (
     <div className="container py-8">
+      {/* React lifts these into the document's <head>: the styles the two
+          descriptions are set with, and the fonts they use. */}
+      <style href={DESCRIPTION_CONTENT_STYLESHEET_ID} precedence="default">
+        {DESCRIPTION_CONTENT_STYLESHEET}
+      </style>
+      {descriptionFonts.map((font) => (
+        <link
+          key={font.name}
+          rel="stylesheet"
+          href={descriptionFontStylesheet([font])}
+          precedence="default"
+        />
+      ))}
       <nav
         aria-label="Breadcrumb"
         className="flex items-center gap-1.5 text-sm text-(--color-text-muted)"
@@ -287,7 +295,7 @@ export default async function ProductDetailPage({
 
             <ProductDetailInfo
               product={product}
-              shortDescription={shortDescription}
+              shortDescriptionHtml={shortDescription}
               weight={product.weight}
               unit={product.unit}
               addToCartLabel={dict.common.add_to_cart}
@@ -298,7 +306,7 @@ export default async function ProductDetailPage({
       </ProductSelectionProvider>
 
       <ProductTabs
-        overviewHtml={rawProduct.overview ?? ""}
+        overviewHtml={overview}
         reviews={reviews}
         reviewSummary={reviewSummary}
       />

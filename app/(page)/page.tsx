@@ -1,5 +1,5 @@
 import { getDictionary } from "@/app/dictionaries";
-import { CategoryGrid } from "@/component/home/CategoryGrid";
+import { BestForGrid } from "@/component/home/BestForGrid";
 import { FeaturedProducts } from "@/component/home/FeaturedProducts";
 import { HeroSection } from "@/component/home/HeroSection";
 import { NewArrivals } from "@/component/home/NewArrivals";
@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <>
       <HeroSection dict={dict} />
-      <CategoryGrid />
+      <BestForGrid />
       <FeaturedProducts dict={dict} />
       <NewArrivals dict={dict} />
       <SellerBanner dict={dict} />
