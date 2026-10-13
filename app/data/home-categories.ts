@@ -1,24 +1,28 @@
 import {
   Baby,
-  Bath,
-  Brush,
+  Boxes,
+  BriefcaseBusiness,
+  DropletOff,
   Droplets,
-  Footprints,
-  Gem,
+  Feather,
   Gift,
-  Handbag,
-  Palette,
-  Scissors,
-  Shirt,
-  SprayCan,
+  Headphones,
+  PartyPopper,
+  ScanFace,
+  Sparkles,
+  Watch,
   type LucideIcon,
 } from "lucide-react";
 
+// A "shop by need" card: not a category, but who or what a product suits —
+// a skin type, an occasion, a kind of buyer. It cuts across every kind of
+// product the shop sells (cosmetics, watches, clothing, gadgets, …).
 export interface HomeCategory {
   title: string;
-  // Same links as the main navigation (app/data/categories.ts).
+  // Placeholder until products can be marked with what they suit (set when a
+  // product is uploaded): for now every card opens the full product list.
   href: string;
-  // Optional photo, e.g. "/assets/categories/skincare.jpg". When it is left
+  // Optional photo, e.g. "/assets/categories/oily-skin.jpg". When it is left
   // out (or fails to load) the card shows its background + icon instead.
   image?: string;
   // Background gradient for the card, top-left → bottom-right.
@@ -26,78 +30,81 @@ export interface HomeCategory {
   icon: LucideIcon;
 }
 
-// The category cards on the homepage, in display order. The grid shows six at
-// a time, so keep this a multiple of six to avoid repeats within a row.
+const preferenceHref = (slug: string) => `/product?preference=${slug}`;
+
+// The cards on the homepage, in display order — static for now. The grid
+// shows six at a time, so keep this a multiple of six to avoid repeats within
+// a row; each six mixes skin needs with other kinds of product.
 export const homeCategories: HomeCategory[] = [
   {
-    title: "Skin Care",
-    href: "/category/skincare",
+    title: "Oily Skin",
+    href: preferenceHref("oily-skin"),
     colors: ["#ff7aa2", "#d10043"],
     icon: Droplets,
   },
   {
-    title: "Makeup",
-    href: "/category/makeup",
+    title: "Acne Care",
+    href: preferenceHref("acne-care"),
     colors: ["#ff0052", "#7a0030"],
-    icon: Palette,
+    icon: ScanFace,
   },
   {
-    title: "Hair Care",
-    href: "/category/hair-care",
+    title: "Dry Skin",
+    href: preferenceHref("dry-skin"),
     colors: ["#f59e7a", "#b4375a"],
-    icon: Scissors,
+    icon: DropletOff,
   },
   {
-    title: "Fragrance",
-    href: "/category/fragrance",
+    title: "Combo Offers",
+    href: preferenceHref("combo-offers"),
     colors: ["#9d4edd", "#3c096c"],
-    icon: SprayCan,
+    icon: Boxes,
   },
   {
-    title: "Bath & Body",
-    href: "/category/bath-body",
+    title: "Everyday Watches",
+    href: preferenceHref("everyday-watches"),
     colors: ["#5ec4c0", "#1f6f78"],
-    icon: Bath,
+    icon: Watch,
   },
   {
-    title: "Tools & Accessories",
-    href: "/category/tools-accessories",
+    title: "Smart Gadgets",
+    href: preferenceHref("smart-gadgets"),
     colors: ["#6b7280", "#1d1d1b"],
-    icon: Brush,
+    icon: Headphones,
   },
   {
-    title: "Clothing",
-    href: "/category/clothing",
+    title: "Sensitive Skin",
+    href: preferenceHref("sensitive-skin"),
     colors: ["#ff4d86", "#1d1d1b"],
-    icon: Shirt,
+    icon: Feather,
   },
   {
-    title: "Jewelry",
-    href: "/category/jewelry",
+    title: "Glow & Brightening",
+    href: preferenceHref("glow-brightening"),
     colors: ["#e0b354", "#8a5a00"],
-    icon: Gem,
+    icon: Sparkles,
   },
   {
-    title: "Bags",
-    href: "/category/bags",
+    title: "Party Wear",
+    href: preferenceHref("party-wear"),
     colors: ["#b08968", "#5e3a1e"],
-    icon: Handbag,
+    icon: PartyPopper,
   },
   {
-    title: "Footwear",
-    href: "/category/footwear",
+    title: "Office Wear",
+    href: preferenceHref("office-wear"),
     colors: ["#64748b", "#1e293b"],
-    icon: Footprints,
+    icon: BriefcaseBusiness,
   },
   {
     title: "Mom & Baby",
-    href: "/category/mom-baby",
+    href: preferenceHref("mom-baby"),
     colors: ["#f9a8d4", "#db2777"],
     icon: Baby,
   },
   {
-    title: "Gift Sets",
-    href: "/category/gift-sets",
+    title: "Gift Ideas",
+    href: preferenceHref("gift-ideas"),
     colors: ["#ff7aa2", "#ff0052"],
     icon: Gift,
   },

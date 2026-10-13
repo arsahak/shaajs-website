@@ -7,6 +7,7 @@ import { Dropdown } from "@/component/motion/Dropdown";
 import { LogOut, Package, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 interface UserMenuProps {
   user: {
@@ -99,7 +100,10 @@ export function UserMenu({ user, dict, className = "" }: UserMenuProps) {
           {dict.nav.settings}
         </Link>
         <div className="my-1 border-t border-(--color-border)" />
-        <form action={signoutAction}>
+        <form
+          action={signoutAction}
+          onSubmit={() => toast.success(dict.nav.signed_out)}
+        >
           <button
             type="submit"
             // Buttons are centred and semi-bold site-wide; this one lines up

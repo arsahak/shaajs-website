@@ -107,7 +107,7 @@ export function FeaturedProducts({ dict }: FeaturedProductsProps) {
   const hasMore = page < totalPages;
 
   return (
-    <section className="pt-3 pb-8 sm:pt-4 sm:pb-10 lg:pt-5">
+    <section className="pt-6 pb-8 sm:pt-8 sm:pb-10 lg:pt-10">
       <div className="container">
         <FadeIn className="flex items-end justify-between gap-4">
           <h2 className="section-title">{dict.home.featured}</h2>

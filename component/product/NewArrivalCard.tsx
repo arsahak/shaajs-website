@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { easeSmooth } from "@/component/motion/variants";
+import { LinkPendingOverlay } from "@/component/product/LinkPendingOverlay";
 import { formatPrice } from "@/app/utils/format-price";
 
 export interface NewArrivalSlide {
@@ -113,6 +114,7 @@ export function NewArrivalCard({
           </div>
         </motion.div>
       </AnimatePresence>
+      <LinkPendingOverlay />
     </Link>
   );
 }

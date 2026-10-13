@@ -17,7 +17,7 @@ export type OtpActionResult = { ok: boolean; error?: string; message?: string };
 // ── Sign out ──────────────────────────────────────────────────────────────────
 
 export async function signoutAction(): Promise<void> {
-  await signOut({ redirectTo: "/sign-in" });
+  await signOut({ redirectTo: "/" });
 }
 
 // ── Customer auth (website sign-in / sign-up) ───────────────────────────────────

@@ -3,12 +3,13 @@
 import type { Product } from "@/app/data/products";
 import { formatPrice } from "@/app/utils/format-price";
 import { useCart } from "@/component/providers/CartProvider";
+import { LinkPendingOverlay } from "@/component/product/LinkPendingOverlay";
 import { useWishlist } from "@/component/providers/WishlistProvider";
 import { ArrowRight, Heart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type MouseEvent, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 /** lucide `shopping-cart-minus` (v1.48, ISC) — not in the installed lucide-react yet. */
 function ShoppingCartMinus({ filled }: { filled: boolean }) {
@@ -64,16 +65,16 @@ export function ProductCard({
   const { isWishlisted, toggleItem } = useWishlist();
   const router = useRouter();
   const wishlisted = isWishlisted(product.id);
+  // Set once the shopper points at, touches or tabs to the card — the sign
+  // they may open it, and the cue to fetch its whole page ahead of the click.
+  const [likelyToOpen, setLikelyToOpen] = useState(false);
   const isInCart = items.some((item) => item.id === product.id);
 
-  // Buttons sit inside the card's <Link>, so stop them from navigating.
   // A product with colors/sizes can't be added blind — the shopper picks
   // them on its page first.
   const productPage = `/product/${product.id}`;
 
-  const handleToggleCart = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleToggleCart = () => {
     if (product.hasOptions) {
       router.push(productPage);
       return;
@@ -82,9 +83,7 @@ export function ProductCard({
     else addItem(product);
   };
 
-  const handleBuyNow = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleBuyNow = () => {
     if (product.hasOptions) {
       router.push(productPage);
       return;
@@ -98,11 +97,16 @@ export function ProductCard({
     : null;
 
   return (
-    <Link
-      href={`/product/${product.id}`}
+    // The whole card opens the product: the title's link is stretched over it
+    // (its ::after covers the card), and the wishlist, cart and buy buttons
+    // sit above that layer so each still does its own job.
+    <article
       // Fills its grid cell and stacks as a column, so every card in a row is
       // the same height whatever its title's length.
-      className="group flex h-full flex-col overflow-hidden rounded-(--radius-lg) border border-(--color-border) bg-(--color-surface) transition-all duration-300 hover:-translate-y-0.5 hover:border-(--color-primary)/30 hover:shadow-lg"
+      onPointerEnter={() => setLikelyToOpen(true)}
+      onTouchStart={() => setLikelyToOpen(true)}
+      onFocus={() => setLikelyToOpen(true)}
+      className="group relative isolate flex h-full flex-col overflow-hidden rounded-(--radius-lg) border border-(--color-border) bg-(--color-surface) transition-all duration-300 hover:-translate-y-0.5 hover:border-(--color-primary)/30 hover:shadow-lg"
     >
       <div
         className={`relative aspect-square shrink-0 overflow-hidden ${
@@ -111,7 +115,7 @@ export function ProductCard({
       >
         {product.badge && (
           <span
-            className={`badge ${badgeClass[product.badge]} absolute start-2 top-2 z-10 shadow-sm`}
+            className={`badge ${badgeClass[product.badge]} pointer-events-none absolute start-2 top-2 z-10 shadow-sm`}
           >
             {product.badge === "sale" && discountPercent
               ? `-${discountPercent}%`
@@ -122,11 +126,7 @@ export function ProductCard({
           type="button"
           aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
           aria-pressed={wishlisted}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleItem(product);
-          }}
+          onClick={() => toggleItem(product)}
           // Out of sight until the card is hovered. It stays on show once the
           // product is saved, when reached by keyboard, and on touch screens,
           // which have no hover to reveal it.
@@ -146,7 +146,7 @@ export function ProductCard({
             alt={product.name}
             fill
             unoptimized
-            className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+            className="object-contain transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           icon
@@ -172,7 +172,16 @@ export function ProductCard({
           title={product.name}
           className="mt-1.5 line-clamp-2 min-h-10 text-sm leading-5 font-semibold text-(--color-dark)"
         >
-          {product.name}
+          <Link
+            href={productPage}
+            // In view: just the page's loading skeleton is fetched ahead, so
+            // a click always lands at once. Pointed at: the whole page is.
+            prefetch={likelyToOpen ? true : null}
+            className="text-inherit after:absolute after:inset-0 after:z-1 after:rounded-(--radius-lg) focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-(--color-primary)"
+          >
+            {product.name}
+            <LinkPendingOverlay />
+          </Link>
         </h3>
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-2.5">
@@ -185,7 +194,7 @@ export function ProductCard({
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="relative z-10 flex shrink-0 items-center gap-1">
             <button
               type="button"
               onClick={handleToggleCart}
@@ -211,7 +220,7 @@ export function ProductCard({
           </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
 

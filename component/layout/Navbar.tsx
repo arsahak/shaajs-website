@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 export interface NavbarUser {
   name?: string | null;
@@ -489,7 +490,13 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
                     {label}
                   </Link>
                 ))}
-                <form action={signoutAction}>
+                <form
+                  action={signoutAction}
+                  onSubmit={() => {
+                    toast.success(dict.nav.signed_out);
+                    closeDrawer();
+                  }}
+                >
                   <button
                     type="submit"
                     aria-label={dict.nav.sign_out}

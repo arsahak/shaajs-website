@@ -72,6 +72,7 @@ export const supplementalCopy = {
   otpResend: "Resend code",
   otpChangeDetails: "Use a different email or phone",
   signupSuccess: "Account created successfully. Welcome to Shaajs!",
+  signedIn: "Signed in successfully. Welcome to Shaajs!",
 };
 
 const OTP_RESEND_COOLDOWN_SECONDS = 60;
@@ -145,10 +146,12 @@ export function AuthForm({
   useEffect(() => {
     if (signinState.ok) {
       // Full page navigation so server components re-render with the fresh
-      // session cookie instead of serving a stale RSC cache.
+      // session cookie instead of serving a stale RSC cache — so the toast
+      // is queued for the page that loads, not shown on this one.
+      queueToast("success", copy.signedIn);
       window.location.href = signinState.redirectTo || callbackUrl;
     }
-  }, [signinState, callbackUrl]);
+  }, [signinState, callbackUrl, copy.signedIn]);
 
   useEffect(() => {
     if (signupState.ok && signupState.otpRequired) {

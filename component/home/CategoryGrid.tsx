@@ -33,9 +33,9 @@ const panelCardVariants: Variants = {
 };
 
 /**
- * The homepage's row of category cards: the fixed list in
- * app/data/home-categories.ts, six at a time, moving on to the next six every
- * few seconds.
+ * The homepage's row of "shop by need" cards (oily skin, combo offers, party
+ * wear, …): the fixed list in app/data/home-categories.ts, six at a time,
+ * moving on to the next six every few seconds.
  */
 export function CategoryGrid() {
   const [page, setPage] = useState(0);

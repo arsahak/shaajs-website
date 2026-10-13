@@ -18,7 +18,9 @@ export function FadeIn({ children, delay = 0, repeat = false, transition, ...pro
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: !repeat, margin: "-80px" }}
+      // Revealed as soon as any part is on screen. (Waiting until it was 80px
+      // in left a blank gap wherever a block only peeked into the first screen.)
+      viewport={{ once: !repeat, amount: "some" }}
       variants={fadeInUp}
       transition={{ delay, ...transition }}
       {...props}

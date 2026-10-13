@@ -237,6 +237,6 @@ export async function deleteMyAccount(): Promise<UserResult> {
     return { ok: false, error: "Network error. Please try again." };
   }
 
-  await signOut({ redirectTo: "/sign-in" });
+  await signOut({ redirectTo: "/" });
   return { ok: true, data: undefined };
 }

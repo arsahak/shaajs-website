@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 type FlashToast = { type: "success" | "error"; message: string };
@@ -36,21 +36,42 @@ function showQueuedToast() {
   }
 }
 
-/** Site-wide toast outlet (bottom-right). Mounted once in the root layout. */
+// Phones: anything narrower than Tailwind's `sm` breakpoint.
+const PHONE_QUERY = "(max-width: 639.98px)";
+
+function subscribeToPhoneQuery(onChange: () => void) {
+  const query = window.matchMedia(PHONE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+/**
+ * Site-wide toast outlet — bottom-centre on phones, bottom-right on anything
+ * wider. Mounted once in the root layout.
+ */
 export function ToastProvider() {
   useEffect(() => {
     showQueuedToast();
   }, []);
 
+  const isPhone = useSyncExternalStore(
+    subscribeToPhoneQuery,
+    () => window.matchMedia(PHONE_QUERY).matches,
+    () => false,
+  );
+
   return (
     <Toaster
-      position="bottom-right"
-      // On phones, clear the floating wishlist/cart buttons in that corner.
-      containerClassName="max-sm:!bottom-40"
+      position={isPhone ? "bottom-center" : "bottom-right"}
+      // No lift on phones: toasts sit at the very bottom, drawn over the
+      // floating wishlist/cart buttons (the toaster's z-index is far above).
       toastOptions={{
         duration: 4000,
         // Theme tokens, so toasts follow light/dark mode.
         style: {
+          // Centred text on phones (the toast itself is centred there);
+          // left-aligned on wider screens.
+          textAlign: isPhone ? "center" : "left",
           fontSize: "0.875rem",
           fontWeight: 500,
           maxWidth: "min(24rem, calc(100vw - 2rem))",

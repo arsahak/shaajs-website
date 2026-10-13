@@ -8,6 +8,7 @@ import { useTheme, type Theme } from "@/component/providers/ThemeProvider";
 import { AtSign, LogOut, Monitor, Moon, Phone, Sun } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import toast from "react-hot-toast";
 
 interface CustomerSettingsProps {
   dict: Dictionary;
@@ -116,7 +117,10 @@ export function CustomerSettings({ dict, profile }: CustomerSettingsProps) {
       </SettingsCard>
 
       <SettingsCard title={dict.nav.sign_out} hint={copy.sign_out_hint}>
-        <form action={signoutAction}>
+        <form
+          action={signoutAction}
+          onSubmit={() => toast.success(dict.nav.signed_out)}
+        >
           <button
             type="submit"
             className="inline-flex h-10 items-center gap-2 rounded-full border border-(--color-error) px-5 text-sm font-semibold text-(--color-error) transition-colors hover:bg-(--color-error) hover:text-white"

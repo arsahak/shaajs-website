@@ -31,9 +31,10 @@ interface HeroSlide {
 }
 
 // Banners live in /public/assets/herosilder — wide strips, about 16:5. On
-// phones and tablets the panel takes that same shape, so the whole banner
-// shows. On desktop the panel is a fixed height beside the offer cards and
-// the banner fills it, its left and right edges cropped.
+// tablets the panel takes that same shape, so the whole banner shows. On
+// phones that shape is too short to read, so the panel is taller (2:1) and
+// the banner fills it, its left and right edges cropped. On desktop the
+// panel is a fixed height beside the offer cards, cropped the same way.
 const slides: HeroSlide[] = [
   {
     id: "bogo-madness",
@@ -198,9 +199,9 @@ export function HeroSection({ dict }: HeroSectionProps) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)] lg:gap-5">
           {/* Banner carousel — pauses while pointed at or focused. */}
           <div
-            // Below desktop the height comes from the banner's own shape
-            // (16:5) rather than a fixed number, so nothing is cut off.
-            className={`relative isolate aspect-[16/5] overflow-hidden rounded-(--radius-xl) bg-black shadow-(--shadow-lg) sm:rounded-(--radius-2xl) lg:aspect-auto ${DESKTOP_HEIGHT}`}
+            // Below desktop the height comes from a shape rather than a fixed
+            // number: 2:1 on phones, the banner's own 16:5 on tablets.
+            className={`relative isolate aspect-[2/1] overflow-hidden rounded-(--radius-xl) bg-black shadow-(--shadow-lg) sm:aspect-[16/5] sm:rounded-(--radius-2xl) lg:aspect-auto ${DESKTOP_HEIGHT}`}
             onMouseEnter={() => setIsHeroPaused(true)}
             onMouseLeave={() => setIsHeroPaused(false)}
             onFocusCapture={() => setIsHeroPaused(true)}
@@ -226,10 +227,10 @@ export function HeroSection({ dict }: HeroSectionProps) {
                     alt={activeHero.imageAlt}
                     fill
                     priority={activeSlide === 0}
-                    // Desktop crops to the panel's height, so the picture
-                    // drawn is wider than the panel; below that the banner
-                    // is simply as wide as the screen.
-                    sizes="(min-width: 1024px) 115vw, 100vw"
+                    // Desktop and phones crop to the panel's height, so the
+                    // picture drawn is wider than the panel; on tablets the
+                    // banner is simply as wide as the screen.
+                    sizes="(min-width: 1024px) 115vw, (min-width: 640px) 100vw, 160vw"
                     className="object-cover"
                   />
                 </Link>

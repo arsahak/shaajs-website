@@ -25,6 +25,7 @@ import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 const badgeClass: Record<"new" | "hot" | "sale", string> = {
   new: "badge-success",
@@ -138,33 +139,9 @@ export default async function ProductDetailPage({
   const cardIndex = hashIndex(rawProduct._id);
   const product = toCatalogCardProduct(rawProduct, cardIndex);
 
-  const [relatedRes, reviewsRes] = await Promise.all([
-    category
-      ? listCatalogProductsAction({ category: category._id, limit: 8 })
-      : Promise.resolve(null),
-    listProductReviewsAction(rawProduct._id, { limit: 10 }),
-  ]);
-
-  let relatedPool = (relatedRes?.data?.products ?? []).filter(
-    (p) => p._id !== rawProduct._id,
-  );
-
-  // Thin categories (or no category at all) shouldn't leave the section
-  // empty — top up with other active products from the wider catalog.
-  if (relatedPool.length < 4) {
-    const fallbackRes = await listCatalogProductsAction({ limit: 8 });
-    const fallbackProducts = (fallbackRes.data?.products ?? []).filter(
-      (p) =>
-        p._id !== rawProduct._id &&
-        !relatedPool.some((existing) => existing._id === p._id),
-    );
-    relatedPool = [...relatedPool, ...fallbackProducts];
-  }
-
-  const related = relatedPool.slice(0, 4).map((p, index) => ({
-    cardProduct: toCatalogCardProduct(p, index),
-    Icon: CATALOG_CARD_ICONS[index % CATALOG_CARD_ICONS.length],
-  }));
+  const reviewsRes = await listProductReviewsAction(rawProduct._id, {
+    limit: 10,
+  });
 
   const reviews = reviewsRes.ok ? (reviewsRes.data?.reviews ?? []) : [];
   const reviewSummary = reviewsRes.ok
@@ -326,28 +303,99 @@ export default async function ProductDetailPage({
         reviewSummary={reviewSummary}
       />
 
-      {related.length > 0 && (
-        <section className="mt-12">
-          <h2 className="section-title">Related Products</h2>
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {related.map(({ cardProduct, Icon: RelatedIcon }) => (
-              <ProductCard
-                addToCartLabel={dict.common.add_to_cart}
-                key={cardProduct.id}
-                product={cardProduct}
-                icon={
-                  <RelatedIcon
-                    aria-hidden="true"
-                    strokeWidth={1.25}
-                    size={64}
-                    className="absolute inset-0 m-auto text-white/90 transition-transform duration-300 group-hover:scale-110"
-                  />
-                }
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Loaded on its own, after the product — the page doesn't wait on it. */}
+      <Suspense fallback={<RelatedProductsSkeleton />}>
+        <RelatedProducts
+          productId={rawProduct._id}
+          categoryId={category?._id}
+          addToCartLabel={dict.common.add_to_cart}
+        />
+      </Suspense>
     </div>
+  );
+}
+
+const RELATED_COUNT = 4;
+
+async function RelatedProducts({
+  productId,
+  categoryId,
+  addToCartLabel,
+}: {
+  productId: string;
+  categoryId?: string;
+  addToCartLabel: string;
+}) {
+  const relatedRes = categoryId
+    ? await listCatalogProductsAction({ category: categoryId, limit: 8 })
+    : null;
+
+  let relatedPool = (relatedRes?.data?.products ?? []).filter(
+    (p) => p._id !== productId,
+  );
+
+  // Thin categories (or no category at all) shouldn't leave the section
+  // empty — top up with other active products from the wider catalog.
+  if (relatedPool.length < RELATED_COUNT) {
+    const fallbackRes = await listCatalogProductsAction({ limit: 8 });
+    const fallbackProducts = (fallbackRes.data?.products ?? []).filter(
+      (p) =>
+        p._id !== productId &&
+        !relatedPool.some((existing) => existing._id === p._id),
+    );
+    relatedPool = [...relatedPool, ...fallbackProducts];
+  }
+
+  const related = relatedPool.slice(0, RELATED_COUNT).map((p, index) => ({
+    cardProduct: toCatalogCardProduct(p, index),
+    Icon: CATALOG_CARD_ICONS[index % CATALOG_CARD_ICONS.length],
+  }));
+
+  if (related.length === 0) return null;
+
+  return (
+    <section className="mt-12">
+      <h2 className="section-title">Related Products</h2>
+      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {related.map(({ cardProduct, Icon: RelatedIcon }) => (
+          <ProductCard
+            addToCartLabel={addToCartLabel}
+            key={cardProduct.id}
+            product={cardProduct}
+            icon={
+              <RelatedIcon
+                aria-hidden="true"
+                strokeWidth={1.25}
+                size={64}
+                className="absolute inset-0 m-auto text-white/90 transition-transform duration-300 group-hover:scale-110"
+              />
+            }
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RelatedProductsSkeleton() {
+  return (
+    <section className="mt-12" aria-hidden="true">
+      <div className="skeleton h-7 w-48 rounded-full" />
+      <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {Array.from({ length: RELATED_COUNT }).map((_, index) => (
+          <div
+            key={index}
+            className="overflow-hidden rounded-(--radius-lg) border border-(--color-border) bg-(--color-surface)"
+          >
+            <div className="skeleton aspect-square" />
+            <div className="space-y-2 p-3">
+              <div className="skeleton h-3 w-20 rounded-full" />
+              <div className="skeleton h-4 w-full rounded-full" />
+              <div className="skeleton h-4 w-2/3 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
