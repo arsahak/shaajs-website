@@ -60,7 +60,7 @@ const slides: HeroSlide[] = [
     id: "puja-sale",
     imageSrc: "/assets/herosilder/banner3.png",
     imageAlt: "Puja Sale — up to 51% off",
-    href: "/category/makeup",
+    href: "/category",
   },
 ];
 
