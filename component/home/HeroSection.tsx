@@ -45,20 +45,20 @@ interface HeroSlide {
 const slides: HeroSlide[] = [
   {
     id: "grand-launch",
-    imageSrc: "/assets/herosilder/grand-launch.png",
+    imageSrc: "/assets/herosilder/banner1.png",
     imageAlt:
       "Shaajs (সাজ'স) Grand Launch — Fashion, Beauty, Lifestyle. Be you, be stylish, be Shaajs. Shop now at www.shaajs.com",
     href: "/product",
   },
   {
     id: "bogo-madness",
-    imageSrc: "/assets/herosilder/image1.webp",
+    imageSrc: "/assets/herosilder/banner2.png",
     imageAlt: "BOGO Madness — the biggest deal of the year",
     href: "/product",
   },
   {
     id: "puja-sale",
-    imageSrc: "/assets/herosilder/image2.webp",
+    imageSrc: "/assets/herosilder/banner3.png",
     imageAlt: "Puja Sale — up to 51% off",
     href: "/category/makeup",
   },
@@ -143,7 +143,8 @@ function OfferSlot({ offers, intervalMs }: OfferSlotProps) {
   const [index, setIndex] = useState(0);
 
   const goTo = useCallback(
-    (i: number) => setIndex(((i % offers.length) + offers.length) % offers.length),
+    (i: number) =>
+      setIndex(((i % offers.length) + offers.length) % offers.length),
     [offers.length],
   );
 
