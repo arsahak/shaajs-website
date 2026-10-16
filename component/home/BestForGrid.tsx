@@ -8,22 +8,25 @@ import {
 const FALLBACK_COLORS: [string, string] = ["#ff7aa2", "#d10043"];
 
 /**
- * The homepage's row of "best for" cards: every option in the shop's Best
- * For list — who or what a product is best for, kept in the dashboard —
- * shown six at a time. With nothing in the list yet, the row is left out
- * altogether.
+ * The homepage's row of "best for" cards: the options pinned in the shop's
+ * Best For list — who or what a product is best for, kept in the dashboard —
+ * and every option of a pinned group, shown six at a time. With nothing
+ * pinned, the row is left out altogether.
  */
 export async function BestForGrid() {
   const res = await listBestForAction();
   const entries = res.ok ? (res.data ?? []) : [];
 
-  const groupNames = new Map(
-    entries
-      .filter((entry) => !entry.parent)
-      .map((group) => [group._id, group.name]),
+  const groups = entries.filter((entry) => !entry.parent);
+  const groupNames = new Map(groups.map((group) => [group._id, group.name]));
+  const pinnedGroups = new Set(
+    groups.filter((group) => group.isPinned).map((group) => group._id),
   );
   const options = entries.filter(
-    (entry) => entry.parent && groupNames.has(entry.parent),
+    (entry) =>
+      entry.parent &&
+      groupNames.has(entry.parent) &&
+      (entry.isPinned || pinnedGroups.has(entry.parent)),
   );
   if (options.length === 0) return null;
 

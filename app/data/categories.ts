@@ -6,13 +6,18 @@ import {
   Footprints,
   Gem,
   Gift,
+  Glasses,
   Handbag,
   HeartPulse,
+  House,
+  Leaf,
   Palette,
   Plug,
   Scissors,
   Shirt,
   SprayCan,
+  UserRound,
+  Watch,
   type LucideIcon,
 } from "lucide-react";
 
@@ -44,6 +49,11 @@ export interface NavCategory {
 
 // A category page shows only its own products when the dashboard has a
 // category whose slug matches the last part of the link (e.g. "lipstick").
+//
+// Mirrors the catalogue's category tree (backend/scripts/data/
+// cosmeticsCategoryTree.ts) in the same order: each department, its groups as
+// columns, and the categories in each group as links. A department's groups
+// with nothing under them share one last column.
 export const navCategories: NavCategory[] = [
   {
     label: "Makeup",
@@ -62,6 +72,7 @@ export const navCategories: NavCategory[] = [
           { label: "Highlighter", href: "/category/makeup/highlighter" },
           { label: "Bronzer & Contour", href: "/category/makeup/bronzer-contour" },
           { label: "Setting Spray", href: "/category/makeup/setting-spray" },
+          { label: "Tinted Moisturizer", href: "/category/makeup/tinted-moisturizer" },
         ],
       },
       {
@@ -75,6 +86,8 @@ export const navCategories: NavCategory[] = [
           { label: "Eyebrow", href: "/category/makeup/eyebrow" },
           { label: "False Eyelashes", href: "/category/makeup/false-eyelashes" },
           { label: "Eye Primer", href: "/category/makeup/eye-primer" },
+          { label: "Under Eye Concealer", href: "/category/makeup/under-eye-concealer" },
+          { label: "Eye Makeup Remover", href: "/category/makeup/eye-makeup-remover" },
         ],
       },
       {
@@ -87,6 +100,7 @@ export const navCategories: NavCategory[] = [
           { label: "Lip Liner", href: "/category/makeup/lip-liner" },
           { label: "Lip Crayon", href: "/category/makeup/lip-crayon" },
           { label: "Lip Balm", href: "/category/makeup/lip-balm" },
+          { label: "Lip Plumper", href: "/category/makeup/lip-plumper" },
         ],
       },
       {
@@ -98,6 +112,8 @@ export const navCategories: NavCategory[] = [
           { label: "Artificial Nails", href: "/category/makeup/artificial-nails" },
           { label: "Nail Care", href: "/category/makeup/nail-care" },
           { label: "Nail Polish Remover", href: "/category/makeup/nail-polish-remover" },
+          { label: "Nail Polish Sets", href: "/category/makeup/nail-polish-sets" },
+          { label: "Manicure & Pedicure Kits", href: "/category/makeup/manicure-pedicure-kits" },
         ],
       },
       {
@@ -132,6 +148,7 @@ export const navCategories: NavCategory[] = [
           { label: "Micellar Water", href: "/category/skincare/micellar-water" },
           { label: "Makeup Remover", href: "/category/skincare/makeup-remover" },
           { label: "Scrub & Exfoliator", href: "/category/skincare/scrub-exfoliator" },
+          { label: "Facial Wipes", href: "/category/skincare/facial-wipes" },
         ],
       },
       {
@@ -144,6 +161,7 @@ export const navCategories: NavCategory[] = [
           { label: "Retinol", href: "/category/skincare/retinol" },
           { label: "Spot Treatment", href: "/category/skincare/spot-treatment" },
           { label: "Face Oil", href: "/category/skincare/face-oil" },
+          { label: "Ampoule", href: "/category/skincare/ampoule" },
         ],
       },
       {
@@ -168,6 +186,9 @@ export const navCategories: NavCategory[] = [
           { label: "Anti-Aging", href: "/category/skincare/anti-aging" },
           { label: "Pores", href: "/category/skincare/pores" },
           { label: "Dark Circles", href: "/category/skincare/dark-circles" },
+          { label: "Dull Skin", href: "/category/skincare/dull-skin" },
+          { label: "Tan Removal", href: "/category/skincare/tan-removal" },
+          { label: "Winter Care", href: "/category/skincare/winter-care" },
         ],
       },
       {
@@ -185,6 +206,7 @@ export const navCategories: NavCategory[] = [
           { label: "Clay Mask", href: "/category/skincare/clay-mask" },
           { label: "Peel-Off Mask", href: "/category/skincare/peel-off-mask" },
           { label: "Sleeping Mask", href: "/category/skincare/sleeping-mask" },
+          { label: "Facial Kits", href: "/category/skincare/facial-kits" },
         ],
       },
       {
@@ -203,6 +225,14 @@ export const navCategories: NavCategory[] = [
           { label: "Under-Eye Patches", href: "/category/skincare/under-eye-patches" },
           { label: "Lip Scrub", href: "/category/skincare/lip-scrub" },
           { label: "Lip Mask", href: "/category/skincare/lip-mask" },
+          { label: "Eye Gel", href: "/category/skincare/eye-gel" },
+          { label: "Eye Roller", href: "/category/skincare/eye-roller" },
+        ],
+      },
+      {
+        title: "More",
+        links: [
+          { label: "K-Beauty", href: "/category/skincare/k-beauty" },
         ],
       },
     ],
@@ -240,6 +270,25 @@ export const navCategories: NavCategory[] = [
           { label: "Hair Color", href: "/category/hair-care/hair-color" },
           { label: "Styling Gel & Spray", href: "/category/hair-care/styling-gel-spray" },
           { label: "Heat Protectant", href: "/category/hair-care/heat-protectant" },
+          { label: "Hair Wax", href: "/category/hair-care/hair-wax" },
+          { label: "Hair Primer", href: "/category/hair-care/hair-primer" },
+        ],
+      },
+      {
+        title: "Shop by Concern",
+        links: [
+          { label: "Dandruff", href: "/category/hair-care/dandruff" },
+          { label: "Dry & Frizzy Hair", href: "/category/hair-care/dry-frizzy-hair" },
+          { label: "Split Ends", href: "/category/hair-care/split-ends" },
+          { label: "Color Protection", href: "/category/hair-care/color-protection" },
+          { label: "Scalp Treatment", href: "/category/hair-care/scalp-treatment" },
+        ],
+      },
+      {
+        title: "By Hair Type",
+        links: [
+          { label: "Curly & Wavy Hair", href: "/category/hair-care/curly-wavy-hair" },
+          { label: "Straight Hair", href: "/category/hair-care/straight-hair" },
         ],
       },
     ],
@@ -274,6 +323,11 @@ export const navCategories: NavCategory[] = [
         links: [
           { label: "Attar", href: "/category/fragrance/attar" },
           { label: "Fragrance Gift Sets", href: "/category/fragrance/fragrance-gift-sets" },
+          { label: "Unisex Perfume", href: "/category/fragrance/unisex-perfume" },
+          { label: "Cologne", href: "/category/fragrance/cologne" },
+          { label: "Eau de Parfum (EDP)", href: "/category/fragrance/eau-de-parfum-edp" },
+          { label: "Eau de Toilette (EDT)", href: "/category/fragrance/eau-de-toilette-edt" },
+          { label: "High-End Perfume", href: "/category/fragrance/high-end-perfume" },
         ],
       },
     ],
@@ -295,6 +349,10 @@ export const navCategories: NavCategory[] = [
           { label: "Body Wash", href: "/category/bath-body/body-wash" },
           { label: "Soap", href: "/category/bath-body/soap" },
           { label: "Body Scrub", href: "/category/bath-body/body-scrub" },
+          { label: "Talcum Powder", href: "/category/bath-body/talcum-powder" },
+          { label: "Loofahs & Sponges", href: "/category/bath-body/loofahs-sponges" },
+          { label: "Hand Wash", href: "/category/bath-body/hand-wash" },
+          { label: "Hand Sanitizer", href: "/category/bath-body/hand-sanitizer" },
         ],
       },
       {
@@ -304,6 +362,7 @@ export const navCategories: NavCategory[] = [
           { label: "Body Butter", href: "/category/bath-body/body-butter" },
           { label: "Hand Cream", href: "/category/bath-body/hand-cream" },
           { label: "Foot Care", href: "/category/bath-body/foot-care" },
+          { label: "Mehedi & Henna", href: "/category/bath-body/mehedi-henna" },
         ],
       },
       {
@@ -319,6 +378,55 @@ export const navCategories: NavCategory[] = [
       subtitle: "Bath essentials and body care.",
       cta: "Shop Bath & Body",
       href: "/category/bath-body",
+    },
+  },
+  {
+    label: "Men",
+    href: "/category/men",
+    icon: UserRound,
+    columns: [
+      {
+        title: "Skin Care",
+        links: [
+          { label: "Men's Face Wash", href: "/category/men/mens-face-wash" },
+          { label: "Men's Moisturizer", href: "/category/men/mens-moisturizer" },
+          { label: "Men's Sunscreen", href: "/category/men/mens-sunscreen" },
+          { label: "Men's Face Scrub", href: "/category/men/mens-face-scrub" },
+        ],
+      },
+      {
+        title: "Hair Care",
+        links: [
+          { label: "Men's Shampoo", href: "/category/men/mens-shampoo" },
+          { label: "Men's Hair Oil", href: "/category/men/mens-hair-oil" },
+          { label: "Men's Hair Color", href: "/category/men/mens-hair-color" },
+          { label: "Men's Hair Styling", href: "/category/men/mens-hair-styling" },
+        ],
+      },
+      {
+        title: "Bath & Body",
+        links: [
+          { label: "Men's Body Wash & Shower Gel", href: "/category/men/mens-body-wash-shower-gel" },
+          { label: "Men's Soap", href: "/category/men/mens-soap" },
+          { label: "Men's Body Lotion", href: "/category/men/mens-body-lotion" },
+        ],
+      },
+      {
+        title: "Shaving",
+        links: [
+          { label: "Razors", href: "/category/men/razors" },
+          { label: "Shaving Cream, Foam & Gel", href: "/category/men/shaving-cream-foam-gel" },
+          { label: "Shaving Brushes", href: "/category/men/shaving-brushes" },
+          { label: "Aftershave Lotion & Balm", href: "/category/men/aftershave-lotion-balm" },
+          { label: "Beard & Moustache Care", href: "/category/men/beard-moustache-care" },
+        ],
+      },
+    ],
+    promo: {
+      title: "Grooming for him",
+      subtitle: "Skin care, hair care, bath and shaving essentials for men.",
+      cta: "Shop Men",
+      href: "/category/men",
     },
   },
   {
@@ -341,6 +449,8 @@ export const navCategories: NavCategory[] = [
           { label: "Mirrors", href: "/category/tools-accessories/mirrors" },
           { label: "Eyelash Curlers", href: "/category/tools-accessories/eyelash-curlers" },
           { label: "Tweezers", href: "/category/tools-accessories/tweezers" },
+          { label: "Sharpeners", href: "/category/tools-accessories/sharpeners" },
+          { label: "Hair Combs & Brushes", href: "/category/tools-accessories/hair-combs-brushes" },
         ],
       },
     ],
@@ -357,7 +467,7 @@ export const navCategories: NavCategory[] = [
     icon: Shirt,
     columns: [
       {
-        title: "Traditional Wear",
+        title: "Women's Traditional",
         links: [
           { label: "Sarees", href: "/category/clothing/sarees" },
           { label: "Salwar Kameez", href: "/category/clothing/salwar-kameez" },
@@ -365,10 +475,11 @@ export const navCategories: NavCategory[] = [
           { label: "Kurtis & Tunics", href: "/category/clothing/kurtis-tunics" },
           { label: "Lehengas", href: "/category/clothing/lehengas" },
           { label: "Orna & Dupatta", href: "/category/clothing/orna-dupatta" },
+          { label: "Blouses", href: "/category/clothing/blouses" },
         ],
       },
       {
-        title: "Western Wear",
+        title: "Women's Western",
         links: [
           { label: "Tops & T-Shirts", href: "/category/clothing/tops-t-shirts" },
           { label: "Shirts", href: "/category/clothing/shirts" },
@@ -376,6 +487,14 @@ export const navCategories: NavCategory[] = [
           { label: "Jeans & Pants", href: "/category/clothing/jeans-pants" },
           { label: "Skirts", href: "/category/clothing/skirts" },
           { label: "Palazzos & Leggings", href: "/category/clothing/palazzos-leggings" },
+          { label: "Crop Tops", href: "/category/clothing/crop-tops" },
+          { label: "Co-ord Sets", href: "/category/clothing/co-ord-sets" },
+          { label: "Jumpsuits & Rompers", href: "/category/clothing/jumpsuits-rompers" },
+          { label: "Kaftans", href: "/category/clothing/kaftans" },
+          { label: "Party Gowns", href: "/category/clothing/party-gowns" },
+          { label: "Women's Shorts", href: "/category/clothing/womens-shorts" },
+          { label: "Shrugs & Cardigans", href: "/category/clothing/shrugs-cardigans" },
+          { label: "Women's Blazers", href: "/category/clothing/womens-blazers" },
         ],
       },
       {
@@ -395,7 +514,7 @@ export const navCategories: NavCategory[] = [
         ],
       },
       {
-        title: "Winter Wear",
+        title: "Women's Winter Wear",
         links: [
           { label: "Sweaters", href: "/category/clothing/sweaters" },
           { label: "Hoodies", href: "/category/clothing/hoodies" },
@@ -403,12 +522,315 @@ export const navCategories: NavCategory[] = [
           { label: "Shawls", href: "/category/clothing/shawls" },
         ],
       },
+      {
+        title: "Men's Topwear",
+        links: [
+          { label: "Men's T-Shirts", href: "/category/clothing/mens-t-shirts" },
+          { label: "Men's Polo Shirts", href: "/category/clothing/mens-polo-shirts" },
+          { label: "Men's Casual Shirts", href: "/category/clothing/mens-casual-shirts" },
+          { label: "Men's Formal Shirts", href: "/category/clothing/mens-formal-shirts" },
+        ],
+      },
+      {
+        title: "Men's Bottomwear",
+        links: [
+          { label: "Men's Jeans", href: "/category/clothing/mens-jeans" },
+          { label: "Men's Chinos & Gabardine", href: "/category/clothing/mens-chinos-gabardine" },
+          { label: "Men's Formal Pants", href: "/category/clothing/mens-formal-pants" },
+          { label: "Men's Joggers", href: "/category/clothing/mens-joggers" },
+          { label: "Men's Shorts & Three-Quarters", href: "/category/clothing/mens-shorts-three-quarters" },
+        ],
+      },
+      {
+        title: "Men's Ethnic Wear",
+        links: [
+          { label: "Panjabi", href: "/category/clothing/panjabi" },
+          { label: "Fatua", href: "/category/clothing/fatua" },
+          { label: "Men's Pajamas", href: "/category/clothing/mens-pajamas" },
+        ],
+      },
+      {
+        title: "Men's Outerwear",
+        links: [
+          { label: "Men's Jackets", href: "/category/clothing/mens-jackets" },
+          { label: "Men's Blazers", href: "/category/clothing/mens-blazers" },
+          { label: "Men's Hoodies & Sweatshirts", href: "/category/clothing/mens-hoodies-sweatshirts" },
+          { label: "Men's Sweaters", href: "/category/clothing/mens-sweaters" },
+        ],
+      },
+      {
+        title: "Men's Innerwear",
+        links: [
+          { label: "Men's Vests", href: "/category/clothing/mens-vests" },
+          { label: "Men's Briefs & Boxers", href: "/category/clothing/mens-briefs-boxers" },
+        ],
+      },
+      {
+        title: "Activewear",
+        links: [
+          { label: "Sports Tops & T-Shirts", href: "/category/clothing/sports-tops-t-shirts" },
+          { label: "Track Pants", href: "/category/clothing/track-pants" },
+          { label: "Tracksuits", href: "/category/clothing/tracksuits" },
+          { label: "Jerseys", href: "/category/clothing/jerseys" },
+          { label: "Yoga Pants & Tights", href: "/category/clothing/yoga-pants-tights" },
+        ],
+      },
+      {
+        title: "Fashion Accessories",
+        links: [
+          { label: "Caps", href: "/category/clothing/caps" },
+          { label: "Hats", href: "/category/clothing/hats" },
+          { label: "Belts", href: "/category/clothing/belts" },
+          { label: "Socks", href: "/category/clothing/socks" },
+          { label: "Ties", href: "/category/clothing/ties" },
+        ],
+      },
     ],
     promo: {
       title: "Style for every day",
-      subtitle: "Traditional, western and modest wear for women.",
+      subtitle: "Western, traditional and everyday wear for women and men.",
       cta: "Shop Clothing",
       href: "/category/clothing",
+    },
+  },
+  {
+    label: "Footwear",
+    href: "/category/footwear",
+    icon: Footprints,
+    columns: [
+      {
+        title: "Women's Casual",
+        links: [
+          { label: "Sandals", href: "/category/footwear/sandals" },
+          { label: "Flats", href: "/category/footwear/flats" },
+          { label: "Slippers", href: "/category/footwear/slippers" },
+          { label: "Sneakers", href: "/category/footwear/sneakers" },
+          { label: "Mules", href: "/category/footwear/mules" },
+          { label: "Flip Flops", href: "/category/footwear/flip-flops" },
+        ],
+      },
+      {
+        title: "Women's Party & Formal",
+        links: [
+          { label: "Heels", href: "/category/footwear/heels" },
+          { label: "Wedges", href: "/category/footwear/wedges" },
+          { label: "Pumps", href: "/category/footwear/pumps" },
+          { label: "Block Heels", href: "/category/footwear/block-heels" },
+          { label: "Stilettos", href: "/category/footwear/stilettos" },
+        ],
+      },
+      {
+        title: "Traditional",
+        links: [
+          { label: "Nagra", href: "/category/footwear/nagra" },
+          { label: "Khussa", href: "/category/footwear/khussa" },
+        ],
+      },
+      {
+        title: "Men's Shoes",
+        links: [
+          { label: "Men's Formal Shoes", href: "/category/footwear/mens-formal-shoes" },
+          { label: "Men's Loafers", href: "/category/footwear/mens-loafers" },
+          { label: "Men's Casual Shoes", href: "/category/footwear/mens-casual-shoes" },
+          { label: "Men's Sneakers", href: "/category/footwear/mens-sneakers" },
+          { label: "Men's Sports Shoes", href: "/category/footwear/mens-sports-shoes" },
+          { label: "Men's Boots", href: "/category/footwear/mens-boots" },
+          { label: "Men's Sandals", href: "/category/footwear/mens-sandals" },
+          { label: "Men's Slippers & Flip Flops", href: "/category/footwear/mens-slippers-flip-flops" },
+        ],
+      },
+    ],
+    promo: {
+      title: "Step out in style",
+      subtitle: "Sandals, heels, sneakers and shoes for women and men.",
+      cta: "Shop Footwear",
+      href: "/category/footwear",
+    },
+  },
+  {
+    label: "Bags",
+    href: "/category/bags",
+    icon: Handbag,
+    columns: [
+      {
+        title: "Handbags",
+        links: [
+          { label: "Shoulder Bags", href: "/category/bags/shoulder-bags" },
+          { label: "Tote Bags", href: "/category/bags/tote-bags" },
+          { label: "Crossbody Bags", href: "/category/bags/crossbody-bags" },
+          { label: "Clutches", href: "/category/bags/clutches" },
+        ],
+      },
+      {
+        title: "Everyday",
+        links: [
+          { label: "Backpacks", href: "/category/bags/backpacks" },
+          { label: "Wallets & Purses", href: "/category/bags/wallets-purses" },
+          { label: "Pouches", href: "/category/bags/pouches" },
+          { label: "Travel Bags", href: "/category/bags/travel-bags" },
+        ],
+      },
+    ],
+    promo: {
+      title: "Carry it your way",
+      subtitle: "Handbags, clutches, backpacks and wallets.",
+      cta: "Shop Bags",
+      href: "/category/bags",
+    },
+  },
+  {
+    label: "Jewelry",
+    href: "/category/jewelry",
+    icon: Gem,
+    columns: [
+      {
+        title: "Earrings & Rings",
+        links: [
+          { label: "Earrings", href: "/category/jewelry/earrings" },
+          { label: "Rings", href: "/category/jewelry/rings" },
+          { label: "Nose Pins", href: "/category/jewelry/nose-pins" },
+        ],
+      },
+      {
+        title: "Necklaces & Sets",
+        links: [
+          { label: "Necklaces", href: "/category/jewelry/necklaces" },
+          { label: "Pendants", href: "/category/jewelry/pendants" },
+          { label: "Jewelry Sets", href: "/category/jewelry/jewelry-sets" },
+          { label: "Bridal Jewelry", href: "/category/jewelry/bridal-jewelry" },
+        ],
+      },
+      {
+        title: "Hands & Feet",
+        links: [
+          { label: "Bangles", href: "/category/jewelry/bangles" },
+          { label: "Bracelets", href: "/category/jewelry/bracelets" },
+          { label: "Anklets", href: "/category/jewelry/anklets" },
+        ],
+      },
+      {
+        title: "Hair Accessories",
+        links: [
+          { label: "Hair Clips", href: "/category/jewelry/hair-clips" },
+          { label: "Hair Bands", href: "/category/jewelry/hair-bands" },
+          { label: "Scrunchies", href: "/category/jewelry/scrunchies" },
+        ],
+      },
+    ],
+    promo: {
+      title: "The finishing touch",
+      subtitle: "Earrings, necklaces, bangles and hair accessories.",
+      cta: "Shop Jewelry",
+      href: "/category/jewelry",
+    },
+  },
+  {
+    label: "Watches",
+    href: "/category/watches",
+    icon: Watch,
+    columns: [
+      {
+        title: "Men's Watches",
+        links: [
+          { label: "Men's Analog Watches", href: "/category/watches/mens-analog-watches" },
+          { label: "Men's Digital Watches", href: "/category/watches/mens-digital-watches" },
+          { label: "Men's Chronograph Watches", href: "/category/watches/mens-chronograph-watches" },
+          { label: "Men's Leather Strap Watches", href: "/category/watches/mens-leather-strap-watches" },
+          { label: "Men's Metal Strap Watches", href: "/category/watches/mens-metal-strap-watches" },
+        ],
+      },
+      {
+        title: "Women's Watches",
+        links: [
+          { label: "Women's Analog Watches", href: "/category/watches/womens-analog-watches" },
+          { label: "Women's Digital Watches", href: "/category/watches/womens-digital-watches" },
+          { label: "Bracelet Watches", href: "/category/watches/bracelet-watches" },
+          { label: "Women's Leather Strap Watches", href: "/category/watches/womens-leather-strap-watches" },
+          { label: "Women's Metal Strap Watches", href: "/category/watches/womens-metal-strap-watches" },
+        ],
+      },
+      {
+        title: "More",
+        links: [
+          { label: "Couple Watches", href: "/category/watches/couple-watches" },
+          { label: "Kids' Watches", href: "/category/watches/kids-watches" },
+          { label: "Sports Watches", href: "/category/watches/sports-watches" },
+          { label: "Luxury Watches", href: "/category/watches/luxury-watches" },
+          { label: "Watch Gift Sets", href: "/category/watches/watch-gift-sets" },
+        ],
+      },
+      {
+        title: "Accessories",
+        links: [
+          { label: "Watch Straps", href: "/category/watches/watch-straps" },
+          { label: "Watch Boxes & Cases", href: "/category/watches/watch-boxes-cases" },
+        ],
+      },
+    ],
+    promo: {
+      title: "Time, in style",
+      subtitle: "Men's, women's, couple and kids' watches.",
+      cta: "Shop Watches",
+      href: "/category/watches",
+    },
+  },
+  {
+    label: "Eyewear",
+    href: "/category/eyewear",
+    icon: Glasses,
+    columns: [
+      {
+        title: "Sunglasses",
+        links: [
+          { label: "Men's Sunglasses", href: "/category/eyewear/mens-sunglasses" },
+          { label: "Women's Sunglasses", href: "/category/eyewear/womens-sunglasses" },
+          { label: "Unisex Sunglasses", href: "/category/eyewear/unisex-sunglasses" },
+          { label: "Kids' Sunglasses", href: "/category/eyewear/kids-sunglasses" },
+        ],
+      },
+      {
+        title: "By Style",
+        links: [
+          { label: "Aviator Sunglasses", href: "/category/eyewear/aviator-sunglasses" },
+          { label: "Wayfarer Sunglasses", href: "/category/eyewear/wayfarer-sunglasses" },
+          { label: "Round Sunglasses", href: "/category/eyewear/round-sunglasses" },
+          { label: "Cat-Eye Sunglasses", href: "/category/eyewear/cat-eye-sunglasses" },
+          { label: "Square Sunglasses", href: "/category/eyewear/square-sunglasses" },
+          { label: "Oversized Sunglasses", href: "/category/eyewear/oversized-sunglasses" },
+          { label: "Polarized Sunglasses", href: "/category/eyewear/polarized-sunglasses" },
+          { label: "Sports Sunglasses", href: "/category/eyewear/sports-sunglasses" },
+        ],
+      },
+      {
+        title: "Eyeglasses",
+        links: [
+          { label: "Eyeglass Frames", href: "/category/eyewear/eyeglass-frames" },
+          { label: "Blue Light Glasses", href: "/category/eyewear/blue-light-glasses" },
+          { label: "Reading Glasses", href: "/category/eyewear/reading-glasses" },
+        ],
+      },
+      {
+        title: "Contact Lenses",
+        links: [
+          { label: "Color Contact Lenses", href: "/category/eyewear/color-contact-lenses" },
+          { label: "Clear Contact Lenses", href: "/category/eyewear/clear-contact-lenses" },
+          { label: "Lens Solution", href: "/category/eyewear/lens-solution" },
+        ],
+      },
+      {
+        title: "Accessories",
+        links: [
+          { label: "Glasses Cases", href: "/category/eyewear/glasses-cases" },
+          { label: "Lens Cleaners", href: "/category/eyewear/lens-cleaners" },
+          { label: "Glasses Chains & Straps", href: "/category/eyewear/glasses-chains-straps" },
+        ],
+      },
+    ],
+    promo: {
+      title: "See the world in style",
+      subtitle: "Sunglasses, eyeglasses and contact lenses.",
+      cta: "Shop Eyewear",
+      href: "/category/eyewear",
     },
   },
   {
@@ -461,128 +883,60 @@ export const navCategories: NavCategory[] = [
           { label: "Earbuds & Headphones", href: "/category/gadgets/earbuds-headphones" },
           { label: "Power Banks", href: "/category/gadgets/power-banks" },
           { label: "Phone Accessories", href: "/category/gadgets/phone-accessories" },
+          { label: "Fitness Bands", href: "/category/gadgets/fitness-bands" },
+        ],
+      },
+      {
+        title: "Mobile Accessories",
+        links: [
+          { label: "Chargers & Adapters", href: "/category/gadgets/chargers-adapters" },
+          { label: "Data Cables", href: "/category/gadgets/data-cables" },
+          { label: "Phone Cases & Covers", href: "/category/gadgets/phone-cases-covers" },
+          { label: "Screen Protectors", href: "/category/gadgets/screen-protectors" },
+          { label: "Phone Holders & Stands", href: "/category/gadgets/phone-holders-stands" },
+        ],
+      },
+      {
+        title: "Audio",
+        links: [
+          { label: "Bluetooth Speakers", href: "/category/gadgets/bluetooth-speakers" },
+          { label: "Neckband Earphones", href: "/category/gadgets/neckband-earphones" },
+          { label: "Wired Earphones", href: "/category/gadgets/wired-earphones" },
+        ],
+      },
+      {
+        title: "Photography & Content",
+        links: [
+          { label: "Ring Lights", href: "/category/gadgets/ring-lights" },
+          { label: "Tripods & Selfie Sticks", href: "/category/gadgets/tripods-selfie-sticks" },
+          { label: "Wireless Microphones", href: "/category/gadgets/wireless-microphones" },
+          { label: "Action Cameras", href: "/category/gadgets/action-cameras" },
+        ],
+      },
+      {
+        title: "Computer Accessories",
+        links: [
+          { label: "Keyboards & Mouse", href: "/category/gadgets/keyboards-mouse" },
+          { label: "Pendrives & Memory Cards", href: "/category/gadgets/pendrives-memory-cards" },
+          { label: "USB Hubs", href: "/category/gadgets/usb-hubs" },
+          { label: "Laptop Stands", href: "/category/gadgets/laptop-stands" },
+        ],
+      },
+      {
+        title: "Home & Personal Gadgets",
+        links: [
+          { label: "Rechargeable Fans", href: "/category/gadgets/rechargeable-fans" },
+          { label: "Desk Lamps", href: "/category/gadgets/desk-lamps" },
+          { label: "Weighing Scales", href: "/category/gadgets/weighing-scales" },
+          { label: "Massagers", href: "/category/gadgets/massagers" },
         ],
       },
     ],
     promo: {
-      title: "Beauty tech made easy",
-      subtitle: "Styling tools, skin devices and everyday gadgets for women.",
+      title: "Gadgets for every day",
+      subtitle: "Beauty tech, mobile accessories, audio and everyday gadgets.",
       cta: "Shop Gadgets",
       href: "/category/gadgets",
-    },
-  },
-  {
-    label: "Jewelry",
-    href: "/category/jewelry",
-    icon: Gem,
-    columns: [
-      {
-        title: "Earrings & Rings",
-        links: [
-          { label: "Earrings", href: "/category/jewelry/earrings" },
-          { label: "Rings", href: "/category/jewelry/rings" },
-          { label: "Nose Pins", href: "/category/jewelry/nose-pins" },
-        ],
-      },
-      {
-        title: "Necklaces & Sets",
-        links: [
-          { label: "Necklaces", href: "/category/jewelry/necklaces" },
-          { label: "Pendants", href: "/category/jewelry/pendants" },
-          { label: "Jewelry Sets", href: "/category/jewelry/jewelry-sets" },
-          { label: "Bridal Jewelry", href: "/category/jewelry/bridal-jewelry" },
-        ],
-      },
-      {
-        title: "Hands & Feet",
-        links: [
-          { label: "Bangles", href: "/category/jewelry/bangles" },
-          { label: "Bracelets", href: "/category/jewelry/bracelets" },
-          { label: "Anklets", href: "/category/jewelry/anklets" },
-        ],
-      },
-      {
-        title: "Hair Accessories",
-        links: [
-          { label: "Hair Clips", href: "/category/jewelry/hair-clips" },
-          { label: "Hair Bands", href: "/category/jewelry/hair-bands" },
-          { label: "Scrunchies", href: "/category/jewelry/scrunchies" },
-        ],
-      },
-    ],
-    promo: {
-      title: "The finishing touch",
-      subtitle: "Earrings, necklaces, bangles and hair accessories.",
-      cta: "Shop Jewelry",
-      href: "/category/jewelry",
-    },
-  },
-  {
-    label: "Bags",
-    href: "/category/bags",
-    icon: Handbag,
-    columns: [
-      {
-        title: "Handbags",
-        links: [
-          { label: "Shoulder Bags", href: "/category/bags/shoulder-bags" },
-          { label: "Tote Bags", href: "/category/bags/tote-bags" },
-          { label: "Crossbody Bags", href: "/category/bags/crossbody-bags" },
-          { label: "Clutches", href: "/category/bags/clutches" },
-        ],
-      },
-      {
-        title: "Everyday",
-        links: [
-          { label: "Backpacks", href: "/category/bags/backpacks" },
-          { label: "Wallets & Purses", href: "/category/bags/wallets-purses" },
-          { label: "Pouches", href: "/category/bags/pouches" },
-          { label: "Travel Bags", href: "/category/bags/travel-bags" },
-        ],
-      },
-    ],
-    promo: {
-      title: "Carry it your way",
-      subtitle: "Handbags, clutches, backpacks and wallets.",
-      cta: "Shop Bags",
-      href: "/category/bags",
-    },
-  },
-  {
-    label: "Footwear",
-    href: "/category/footwear",
-    icon: Footprints,
-    columns: [
-      {
-        title: "Casual",
-        links: [
-          { label: "Sandals", href: "/category/footwear/sandals" },
-          { label: "Flats", href: "/category/footwear/flats" },
-          { label: "Slippers", href: "/category/footwear/slippers" },
-          { label: "Sneakers", href: "/category/footwear/sneakers" },
-        ],
-      },
-      {
-        title: "Party & Formal",
-        links: [
-          { label: "Heels", href: "/category/footwear/heels" },
-          { label: "Wedges", href: "/category/footwear/wedges" },
-          { label: "Pumps", href: "/category/footwear/pumps" },
-        ],
-      },
-      {
-        title: "Traditional",
-        links: [
-          { label: "Nagra", href: "/category/footwear/nagra" },
-          { label: "Khussa", href: "/category/footwear/khussa" },
-        ],
-      },
-    ],
-    promo: {
-      title: "Step out in style",
-      subtitle: "Sandals, heels, flats and traditional footwear.",
-      cta: "Shop Footwear",
-      href: "/category/footwear",
     },
   },
   {
@@ -598,6 +952,10 @@ export const navCategories: NavCategory[] = [
           { label: "Baby Shampoo & Wash", href: "/category/mom-baby/baby-shampoo-wash" },
           { label: "Baby Powder", href: "/category/mom-baby/baby-powder" },
           { label: "Diaper Rash Cream", href: "/category/mom-baby/diaper-rash-cream" },
+          { label: "Baby Soap", href: "/category/mom-baby/baby-soap" },
+          { label: "Baby Cream", href: "/category/mom-baby/baby-cream" },
+          { label: "Baby Wipes", href: "/category/mom-baby/baby-wipes" },
+          { label: "Baby Sunscreen", href: "/category/mom-baby/baby-sunscreen" },
         ],
       },
       {
@@ -643,14 +1001,57 @@ export const navCategories: NavCategory[] = [
           { label: "Toothpaste", href: "/category/health-wellness/toothpaste" },
           { label: "Mouthwash", href: "/category/health-wellness/mouthwash" },
           { label: "Teeth Whitening", href: "/category/health-wellness/teeth-whitening" },
+          { label: "Toothbrush", href: "/category/health-wellness/toothbrush" },
+          { label: "Dental Floss", href: "/category/health-wellness/dental-floss" },
+        ],
+      },
+      {
+        title: "Wellness",
+        links: [
+          { label: "Sexual Wellness", href: "/category/health-wellness/sexual-wellness" },
+          { label: "Weight Management", href: "/category/health-wellness/weight-management" },
+          { label: "Health & Fitness", href: "/category/health-wellness/health-fitness" },
         ],
       },
     ],
     promo: {
       title: "Feel good every day",
-      subtitle: "Feminine care, supplements and oral care.",
+      subtitle: "Feminine care, supplements, oral care and wellness.",
       cta: "Shop Health & Wellness",
       href: "/category/health-wellness",
+    },
+  },
+  {
+    label: "Home Care",
+    href: "/category/home-care",
+    icon: House,
+    columns: [
+      {
+        title: "Home Care",
+        links: [
+          { label: "Air Fresheners", href: "/category/home-care/air-fresheners" },
+          { label: "Bathroom Essentials", href: "/category/home-care/bathroom-essentials" },
+          { label: "Germ Control", href: "/category/home-care/germ-control" },
+        ],
+      },
+    ],
+    promo: {
+      title: "A fresh, clean home",
+      subtitle: "Air fresheners, bathroom essentials and germ control.",
+      cta: "Shop Home Care",
+      href: "/category/home-care",
+    },
+  },
+  {
+    label: "Natural",
+    href: "/category/natural",
+    icon: Leaf,
+    columns: [],
+    promo: {
+      title: "Naturally yours",
+      subtitle: "Natural and herbal beauty products.",
+      cta: "Shop Natural",
+      href: "/category/natural",
     },
   },
   {

@@ -45,8 +45,8 @@ function ShoppingCartMinus({ filled }: { filled: boolean }) {
 
 const badgeClass: Record<NonNullable<Product["badge"]>, string> = {
   new: "badge-success",
-  hot: "badge-secondary",
-  sale: "badge-warning",
+  hot: "badge-hot",
+  sale: "badge-sale",
 };
 
 interface ProductCardProps {

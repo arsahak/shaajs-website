@@ -15,8 +15,8 @@ interface MegaMenuProps {
 
 const badgeClass: Record<string, string> = {
   new: "badge-success",
-  hot: "badge-secondary",
-  sale: "badge-warning",
+  hot: "badge-hot",
+  sale: "badge-sale",
 };
 
 export function MegaMenu({ category, show, onNavigate }: MegaMenuProps) {

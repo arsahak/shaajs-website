@@ -193,7 +193,7 @@ function OfferSlot({ offers, intervalMs }: OfferSlotProps) {
                     {offer.title}
                   </p>
                   <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <span className="inline-flex rounded-full bg-(--color-secondary) px-2.5 py-1 text-xs leading-none font-extrabold text-(--color-secondary-foreground) sm:text-sm">
+                    <span className="inline-flex rounded-full bg-(--color-sale) px-2.5 py-1 text-xs leading-none font-extrabold text-white sm:text-sm">
                       {offer.discount}
                     </span>
                     <span className="flex items-baseline gap-2 leading-none">
@@ -219,7 +219,7 @@ function OfferSlot({ offers, intervalMs }: OfferSlotProps) {
                   <p className="line-clamp-1 max-w-[85%] text-base leading-snug font-bold break-words text-white xl:line-clamp-2 xl:text-xl">
                     {offer.title}
                   </p>
-                  <span className="mt-2 inline-flex max-w-full rounded-full bg-(--color-secondary) px-3 py-1 text-start text-xs leading-snug font-extrabold whitespace-normal text-(--color-secondary-foreground) sm:text-sm">
+                  <span className="mt-2 inline-flex max-w-full rounded-full bg-(--color-sale) px-3 py-1 text-start text-xs leading-snug font-extrabold whitespace-normal text-white sm:text-sm">
                     {offer.discount}
                   </span>
                 </div>

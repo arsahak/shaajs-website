@@ -23,6 +23,11 @@ export interface BestFor {
   /** The card's background gradient: two #rrggbb colors, start then end. */
   colors?: string[];
   isActive: boolean;
+  /**
+   * Picked in the dashboard for the homepage: a pinned option, or every
+   * option of a pinned group, gets a card there.
+   */
+  isPinned?: boolean;
   sortOrder: number;
   /** Active products tagged with this option. */
   productCount?: number;

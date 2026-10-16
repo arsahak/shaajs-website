@@ -17,16 +17,23 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { navCategories } from "@/app/data/categories";
 
 interface CategoryLike {
   name: string;
   slug: string;
 }
 
-// Real categories don't carry an icon field from the backend, so this
-// guesses a fitting Lucide icon from the name/slug — shared by every place
+// Real categories don't carry an icon field from the backend. A department
+// in the navbar (Makeup, Watches, …) gets the icon the navbar gives it; any
+// other category gets one guessed from its name/slug — shared by every place
 // that lists real categories (homepage grid, product listing sidebar, ...).
 export function getCategoryIcon(category: CategoryLike): LucideIcon {
+  const department = navCategories.find(
+    (item) => item.href === `/category/${category.slug}`,
+  );
+  if (department) return department.icon;
+
   const text = `${category.name} ${category.slug}`.toLowerCase();
 
   if (

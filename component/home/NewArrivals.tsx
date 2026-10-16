@@ -15,6 +15,10 @@ import {
   CATALOG_CARD_ICONS,
   toCatalogCardProduct,
 } from "@/component/product/catalogProductCard";
+import {
+  NEW_ARRIVALS_CARD_CLASS,
+  NEW_ARRIVALS_ROW_CLASS,
+} from "@/component/common/Skeletons";
 
 interface NewArrivalsProps {
   dict: Dictionary;
@@ -24,8 +28,9 @@ interface NewArrivalsProps {
 const MAX_PRODUCTS = 100;
 // With nothing marked "New Arrival" yet, the latest products stand in.
 const LATEST_FALLBACK = 20;
-// One card per category, up to this many (two rows of five on a desktop).
-const MAX_CARDS = 10;
+// One card per category, up to this many — a single row. "View all" opens
+// every new arrival.
+const MAX_CARDS = 5;
 // Each card turns through this many of its category's products at most —
 // more and the progress bars across its top get too thin to read.
 const MAX_SLIDES = 8;
@@ -44,7 +49,8 @@ const CARD_GRADIENTS = [
 ];
 
 /**
- * The homepage's new arrivals: a row of story-style cards, one per category.
+ * The homepage's new arrivals: one row of five story-style cards, one per
+ * category — side by side on a desktop, a row to swipe through on a phone.
  * Each card turns through the new products of its own category — a Makeup
  * card shows only makeup — and opens the product it is showing when clicked.
  */
@@ -153,16 +159,19 @@ export async function NewArrivals({ dict }: NewArrivalsProps) {
           </Link>
         </FadeIn>
 
-        <FadeIn className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <FadeIn className={`mt-6 ${NEW_ARRIVALS_ROW_CLASS}`}>
           {cards.map((card, cardIndex) => (
-            <NewArrivalCard
-              key={card.id}
-              label={card.name}
-              slides={card.slides}
-              // A different pace for each card, so the row doesn't tick in
-              // lockstep.
-              intervalMs={BASE_INTERVAL_MS + (cardIndex % 5) * INTERVAL_STEP_MS}
-            />
+            <div key={card.id} className={NEW_ARRIVALS_CARD_CLASS}>
+              <NewArrivalCard
+                label={card.name}
+                slides={card.slides}
+                // A different pace for each card, so the row doesn't tick in
+                // lockstep.
+                intervalMs={
+                  BASE_INTERVAL_MS + (cardIndex % 5) * INTERVAL_STEP_MS
+                }
+              />
+            </div>
           ))}
         </FadeIn>
       </div>

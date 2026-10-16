@@ -104,17 +104,23 @@ export function BestForRowSkeleton() {
 }
 
 /** The homepage's new arrivals: a heading and a row of tall cards. */
+// The homepage's new arrivals row, shared with its skeleton: five cards side
+// by side on a desktop; below that a single row that scrolls sideways,
+// running to the screen edges, two and a bit cards in view.
+export const NEW_ARRIVALS_ROW_CLASS =
+  "-mx-4 flex snap-x gap-4 overflow-x-auto scroll-px-4 px-4 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden";
+export const NEW_ARRIVALS_CARD_CLASS = "w-[42%] shrink-0 snap-start sm:w-[30%] lg:w-auto";
+
 export function NewArrivalsSkeleton() {
   return (
     <section className="py-8 sm:py-10" aria-hidden="true">
       <div className="container">
         <div className="skeleton h-8 w-44 rounded-full" />
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className={`mt-6 ${NEW_ARRIVALS_ROW_CLASS}`}>
           {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="skeleton aspect-[3/4] rounded-(--radius-2xl)"
-            />
+            <div key={index} className={NEW_ARRIVALS_CARD_CLASS}>
+              <div className="skeleton aspect-[3/4] rounded-(--radius-2xl)" />
+            </div>
           ))}
         </div>
       </div>

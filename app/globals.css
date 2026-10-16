@@ -39,6 +39,12 @@
   /* Semantic */
   --color-success: #10b981;
   --color-warning: #f59e0b;
+  /* The discount badge on product pictures: a deep green-black, kept off the
+     brand pinks so a price cut stands apart from the shop's own color. It
+     sits on the picture's white tile, so it is the same in the dark theme. */
+  --color-sale: #0f2e24;
+  /* The "hot" badge beside it: a true red, dark enough for white text. */
+  --color-hot: #dc2626;
   --color-error: #ef4444;
   --color-info: #3b82f6;
 
@@ -733,6 +739,14 @@
   .badge-warning {
     background-color: var(--color-accent);
     color: var(--color-dark);
+  }
+  .badge-sale {
+    background-color: var(--color-sale);
+    color: var(--color-white);
+  }
+  .badge-hot {
+    background-color: var(--color-hot);
+    color: var(--color-white);
   }
   .badge-outline {
     border: 1.5px solid var(--color-primary);

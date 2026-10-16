@@ -391,11 +391,19 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
                 <Link
                   key={category.href}
                   href={category.href}
-                  onMouseEnter={() => hoverMegaCategory(category.label)}
+                  // A department with nothing under it (Natural) has no menu
+                  // to open — it closes whichever one is open instead.
+                  onMouseEnter={() =>
+                    category.columns.length > 0
+                      ? hoverMegaCategory(category.label)
+                      : showMega(null, MEGA_CLOSE_DELAY_MS)
+                  }
                   onMouseLeave={() => leaveMegaCategory(category.label)}
                   // The keyboard gets its menu at once: tabbing onto a
                   // category is never by accident.
-                  onFocus={() => showMega(category.label)}
+                  onFocus={() =>
+                    showMega(category.columns.length > 0 ? category.label : null)
+                  }
                   onClick={() => showMega(null)}
                   className={`shrink-0 border-b-2 px-3 py-3 text-sm font-semibold whitespace-nowrap transition-colors first:ps-0 hover:text-(--color-primary) ${
                     megaCategory === category.label
@@ -437,14 +445,16 @@ const Navbar = ({ dict, user, brands }: NavbarProps) => {
           </div>
         </div>
 
-        {navCategories.map((category) => (
-          <MegaMenu
-            key={category.href}
-            category={category}
-            show={megaCategory === category.label}
-            onNavigate={() => showMega(null)}
-          />
-        ))}
+        {navCategories
+          .filter((category) => category.columns.length > 0)
+          .map((category) => (
+            <MegaMenu
+              key={category.href}
+              category={category}
+              show={megaCategory === category.label}
+              onNavigate={() => showMega(null)}
+            />
+          ))}
       </nav>
 
       {/* Mobile drawer — opens from the toggle's side. */}
