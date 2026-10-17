@@ -32,6 +32,7 @@ export type CatalogCardProduct = {
   weight: number;
   unit: ProductUnit;
   hasOptions: boolean;
+  freeDelivery: boolean;
 };
 
 export const CATALOG_CARD_ICONS: LucideIcon[] = [
@@ -107,5 +108,6 @@ export function toCatalogCardProduct(
     unit: product.unit,
     hasOptions:
       (product.colors?.length ?? 0) > 0 || (product.sizes?.length ?? 0) > 0,
+    freeDelivery: product.isFreeDelivery === true,
   };
 }

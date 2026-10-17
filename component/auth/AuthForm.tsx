@@ -1,5 +1,6 @@
 "use client";
 
+import { OTP_LENGTH } from "@/component/auth/OtpInput";
 import {
   customerSigninAction,
   customerSignupAction,
@@ -67,7 +68,7 @@ export const supplementalCopy = {
   passwordHint: "Use 8 or more characters",
   secureNote: "Your information is protected with secure encryption.",
   otpTitle: "Verify your account",
-  otpSubtitle: "We sent a 6-digit code to",
+  otpSubtitle: `We sent a ${OTP_LENGTH}-digit code to`,
   otpVerify: "Verify & continue",
   otpResend: "Resend code",
   otpChangeDetails: "Use a different email or phone",
@@ -307,8 +308,8 @@ export function AuthForm({
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                maxLength={6}
-                placeholder="123456"
+                maxLength={OTP_LENGTH}
+                placeholder={"1234567890".slice(0, OTP_LENGTH)}
                 required
                 autoFocus
                 enterKeyHint="done"
@@ -337,7 +338,7 @@ export function AuthForm({
               disabled={resendPending || resendCooldown > 0}
               className="p-0 font-semibold text-(--color-primary) hover:text-(--color-primary-dark) disabled:cursor-not-allowed disabled:text-(--color-text-light)"
             >
-              {resendCooldown > 0 ? `${copy.otpResend} (${resendCooldown}s)` : copy.otpResend}
+              {copy.otpResend}
             </button>
           </div>
 

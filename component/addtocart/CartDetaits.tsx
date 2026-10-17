@@ -157,10 +157,6 @@ const CartDetaits = ({ dict }: CartDetaitsProps) => {
             <span className="text-(--color-text-muted)">{dict.cart.subtotal}</span>
             <span className="font-medium text-(--color-dark)">{formatPrice(subtotal)}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-(--color-text-muted)">{dict.cart.shipping}</span>
-            <span className="font-medium text-(--color-success)">Free</span>
-          </div>
         </div>
 
         <div className="flex items-center justify-between border-t border-(--color-border) pt-3">

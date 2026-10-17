@@ -1,5 +1,6 @@
 "use client";
 
+import { OTP_LENGTH } from "@/component/auth/OtpInput";
 import {
   requestPasswordResetAction,
   resetPasswordAction,
@@ -334,8 +335,8 @@ export function ForgotPasswordForm({
                 type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                maxLength={6}
-                placeholder="123456"
+                maxLength={OTP_LENGTH}
+                placeholder={"1234567890".slice(0, OTP_LENGTH)}
                 required
                 autoFocus
                 enterKeyHint="done"
@@ -359,9 +360,7 @@ export function ForgotPasswordForm({
               disabled={pending || resendCooldown > 0}
               className={linkButtonClass}
             >
-              {resendCooldown > 0
-                ? `${otpCopy.otpResend} (${resendCooldown}s)`
-                : otpCopy.otpResend}
+              {otpCopy.otpResend}
             </button>
           </div>
 

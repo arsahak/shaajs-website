@@ -2,6 +2,11 @@
 
 import { useRef, type ClipboardEvent, type KeyboardEvent } from "react";
 
+// How many digits every code the shop sends has — sign-in, checkout, sign-up
+// and password reset. The backend's OTP_LENGTH (backend/utils/otp.ts) has to
+// match.
+export const OTP_LENGTH = 4;
+
 interface OtpInputProps {
   /** The digits typed so far, e.g. "4821". */
   value: string;
@@ -17,7 +22,7 @@ interface OtpInputProps {
 export function OtpInput({
   value,
   onChange,
-  length = 6,
+  length = OTP_LENGTH,
   invalid = false,
 }: OtpInputProps) {
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
@@ -72,7 +77,8 @@ export function OtpInput({
   };
 
   return (
-    <div className="grid grid-cols-6 gap-2 sm:gap-3">
+    // A row of equal boxes, centred whatever the code's length.
+    <div className="flex justify-center gap-2 sm:gap-3">
       {Array.from({ length }).map((_, index) => (
         <input
           key={index}
@@ -91,7 +97,7 @@ export function OtpInput({
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
           onFocus={(event) => event.target.select()}
-          className={`h-13 rounded-lg p-0 text-center text-xl font-bold focus:border-(--color-dark) focus:shadow-none focus:outline-none ${
+          className={`h-13 w-12 rounded-lg p-0 text-center sm:w-14 text-xl font-bold focus:border-(--color-dark) focus:shadow-none focus:outline-none ${
             invalid
               ? "border-(--color-error)"
               : value[index]

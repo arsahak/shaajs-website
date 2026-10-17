@@ -9,19 +9,19 @@ export interface DeliveryZoneInfo {
   description: string;
 }
 
-// Fees mirror backend createOrder (and CheckoutDetails.deliveryFeeFor): ৳80
-// for Dhaka division + "Inside Dhaka", ৳150 everywhere else. The backend's
+// Fees mirror backend createOrder (and CheckoutDetails.deliveryFeeFor): ৳65
+// for Dhaka division + "Inside Dhaka", ৳115 everywhere else. The backend's
 // figure is what is actually charged — keep these in step with it.
 export const deliveryZones: DeliveryZoneInfo[] = [
   {
     name: "Inside Dhaka",
-    fee: 80,
+    fee: 65,
     days: "1–3",
     description: "Dhaka city and nearby areas — choose Dhaka division and the Inside Dhaka zone at checkout.",
   },
   {
     name: "Outside Dhaka",
-    fee: 150,
+    fee: 115,
     days: "3–5",
     description: `Everywhere else in Bangladesh, across all ${BD_DIVISIONS.length} divisions.`,
   },

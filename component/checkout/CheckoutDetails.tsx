@@ -4,7 +4,7 @@ import type { Dictionary } from "@/app/dictionaries";
 import { DELIVERY_ZONES, type DeliveryZone } from "@/app/data/checkout";
 import { cartLineKey, useCart } from "@/component/providers/CartProvider";
 import { formatPrice } from "@/app/utils/format-price";
-import { PhoneInput } from "@/component/common/PhoneInput";
+import { BdPhoneInput } from "@/component/common/BdPhoneInput";
 import {
   AlertCircle,
   Banknote,
@@ -38,7 +38,7 @@ import {
 } from "@/app/actions/order";
 import { requestSigninOtpAction } from "@/app/actions/auth";
 import { OrderVerifyDialog } from "@/component/checkout/OrderVerifyDialog";
-import { parsePhoneNumberFromString } from "libphonenumber-js/min";
+import { formatBdMobile } from "@/app/utils/bd-mobile";
 import { OrderSuccessModal } from "./OrderSuccessModal";
 
 interface CheckoutDetailsProps {
@@ -58,10 +58,10 @@ interface CheckoutDetailsProps {
   };
 }
 
-// Mirrors backend createOrder: 80 inside Dhaka, 150 everywhere else. The
+// Mirrors backend createOrder: 65 inside Dhaka, 115 everywhere else. The
 // backend's figure is what's actually charged.
 function deliveryFeeFor(zone: DeliveryZone): number {
-  return zone === "Inside Dhaka" ? 80 : 150;
+  return zone === "Inside Dhaka" ? 65 : 115;
 }
 
 // The ways to pay, as small cards. Only cash on delivery works for now; the
@@ -113,9 +113,10 @@ interface PendingVerification {
   order: PlaceOrderInput;
 }
 
-// A code stays good for ten minutes; one sent less than this long ago is
-// reused when the customer comes back to the same contact.
-const CODE_REUSE_MS = 9 * 60_000;
+// A code stays good for five minutes; one sent less than this long ago is
+// reused when the customer comes back to the same contact — leaving them at
+// least a minute to type it.
+const CODE_REUSE_MS = 4 * 60_000;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -175,7 +176,7 @@ const CheckoutDetails = ({
   isSignedIn,
   initialUser,
 }: CheckoutDetailsProps) => {
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, removeItem } = useCart();
   const router = useRouter();
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
   const orderPlaced = placedOrder !== null;
@@ -207,7 +208,14 @@ const CheckoutDetails = ({
   );
   const [email, setEmail] = useState(initialUser?.email ?? "");
 
-  const deliveryFee = items.length > 0 ? deliveryFeeFor(zone) : 0;
+  // Free only when every product in the cart is marked Free Delivery; one
+  // that isn't brings the zone's fee back — the same rule the backend
+  // charges by. (A product added to the cart before this flag was kept
+  // counts as charged until it is added again.)
+  const freeDelivery =
+    items.length > 0 && items.every((item) => item.freeDelivery === true);
+  const deliveryFee =
+    items.length > 0 && !freeDelivery ? deliveryFeeFor(zone) : 0;
   // A coupon the customer applied, and what it takes off the products.
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState<{
@@ -244,7 +252,8 @@ const CheckoutDetails = ({
 
     // The chosen contact must be valid; the other one is sent along too when
     // it's there (already on the account, or typed before switching).
-    // PhoneInput leaves its value empty while the number isn't a valid one.
+    // BdPhoneInput leaves its value empty while the number isn't a valid
+    // Bangladeshi mobile.
     const phone = field("customerPhone");
     const emailAddress = EMAIL_RE.test(email.trim()) ? email.trim() : "";
     if (contactMethod === "phone" && !phone) {
@@ -296,8 +305,7 @@ const CheckoutDetails = ({
   const startVerification = async (order: PlaceOrderInput, contact: string) => {
     const sentTo =
       contactMethod === "phone"
-        ? (parsePhoneNumberFromString(contact)?.formatInternational() ??
-          contact)
+        ? formatBdMobile(contact)
         : contact;
 
     const last = lastCodeRef.current;
@@ -445,7 +453,7 @@ const CheckoutDetails = ({
               <label htmlFor="checkout-phone" className="sr-only">
                 {dict.auth.phone}
               </label>
-              <PhoneInput
+              <BdPhoneInput
                 id="checkout-phone"
                 name="customerPhone"
                 required={contactMethod === "phone"}
@@ -516,9 +524,14 @@ const CheckoutDetails = ({
                   {z === "Inside Dhaka"
                     ? dict.checkoutPage.inside_dhaka
                     : dict.checkoutPage.outside_dhaka}
-                  {/* What picking this zone adds to the order. */}
+                  {/* What picking this zone adds to the order — nothing when
+                      everything in the cart is delivered free. */}
                   <span className="font-normal text-(--color-text-muted)">
-                    ({formatPrice(deliveryFeeFor(z))})
+                    (
+                    {freeDelivery
+                      ? dict.checkoutPage.free_delivery
+                      : formatPrice(deliveryFeeFor(z))}
+                    )
                   </span>
                 </RadioOption>
               ))}
@@ -649,30 +662,46 @@ const CheckoutDetails = ({
             {dict.checkoutPage.order_items}
           </h3>
 
-          <div className="flex max-h-[280px] flex-col gap-3 overflow-y-auto">
+          {/* pt-1.5: room inside the scrolling list for the × that sticks
+              out past the first picture. */}
+          <div className="flex max-h-[280px] flex-col gap-3 overflow-y-auto pt-1.5">
             {items.map((item) => (
               <div key={cartLineKey(item)} className="flex items-center gap-3">
-                <div
-                  className={`relative size-12 shrink-0 overflow-hidden rounded-(--radius-md) ${
-                    item.image ? "bg-white" : `bg-linear-to-br ${item.gradient}`
-                  }`}
-                >
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      unoptimized
-                      className="object-contain p-1"
-                    />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center text-white/90">
-                      <ShoppingBag size={18} />
-                    </span>
-                  )}
-                  <span className="absolute -end-1.5 -top-1.5 flex size-4.5 items-center justify-center rounded-full bg-(--color-dark) text-[10px] font-bold text-white">
-                    {item.qty}
-                  </span>
+                {/* The picture, with the × to take the item out on its
+                    top-right corner — outside the clipped picture, so it
+                    isn't cut off. */}
+                <div className="relative shrink-0">
+                  <div
+                    className={`relative size-12 overflow-hidden rounded-(--radius-md) ${
+                      item.image ? "bg-white" : `bg-linear-to-br ${item.gradient}`
+                    }`}
+                  >
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        unoptimized
+                        className="object-contain p-1"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-white/90">
+                        <ShoppingBag size={18} />
+                      </span>
+                    )}
+                  </div>
+                  {/* Taking the last one out leaves the page's empty-cart
+                      message. Not while the order is being placed. */}
+                  <button
+                    type="button"
+                    aria-label={`${dict.cart.remove} ${item.name}`}
+                    title={dict.cart.remove}
+                    disabled={submitting}
+                    onClick={() => removeItem(cartLineKey(item))}
+                    className="absolute -end-1.5 -top-1.5 flex size-4.5 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) p-0 text-(--color-text-muted) shadow-(--shadow-sm) transition-colors hover:border-(--color-error) hover:bg-(--color-error) hover:text-white disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    <X size={10} strokeWidth={3} />
+                  </button>
                 </div>
                 <p className="line-clamp-2 flex-1 text-xs text-(--color-text-muted)">
                   {item.name}
@@ -682,9 +711,15 @@ const CheckoutDetails = ({
                     </span>
                   )}
                 </p>
-                <span className="shrink-0 text-sm font-medium text-(--color-dark)">
-                  {formatPrice(item.price * item.qty)}
-                </span>
+                {/* What the line costs, and under it how many at what each. */}
+                <div className="shrink-0 text-end">
+                  <span className="block text-sm font-medium text-(--color-dark)">
+                    {formatPrice(item.price * item.qty)}
+                  </span>
+                  <span className="block text-xs text-(--color-text-muted)">
+                    {item.qty} × {formatPrice(item.price)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
@@ -702,9 +737,15 @@ const CheckoutDetails = ({
               <span className="text-(--color-text-muted)">
                 {dict.checkoutPage.delivery_fee}
               </span>
-              <span className="font-medium text-(--color-dark)">
-                {formatPrice(deliveryFee)}
-              </span>
+              {freeDelivery ? (
+                <span className="font-medium text-(--color-success)">
+                  {dict.checkoutPage.free_delivery}
+                </span>
+              ) : (
+                <span className="font-medium text-(--color-dark)">
+                  {formatPrice(deliveryFee)}
+                </span>
+              )}
             </div>
             {coupon && (
               <div className="flex items-center justify-between text-(--color-success)">

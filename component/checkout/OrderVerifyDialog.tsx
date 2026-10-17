@@ -2,8 +2,9 @@
 
 import { requestSigninOtpAction } from "@/app/actions/auth";
 import { submitClass } from "@/component/auth/authStyles";
-import { OtpInput } from "@/component/auth/OtpInput";
-import { otpSignInCopy } from "@/component/auth/OtpSignIn";
+import { OTP_LENGTH, OtpInput } from "@/component/auth/OtpInput";
+import { OtpExpiryNote, otpSignInCopy } from "@/component/auth/OtpSignIn";
+import { useOtpCountdown } from "@/component/auth/useOtpCountdown";
 import { easeSmooth } from "@/component/motion/variants";
 import { motion } from "framer-motion";
 import { ArrowRight, Loader2, ShieldCheck, X } from "lucide-react";
@@ -36,18 +37,8 @@ const copy = {
   placing: "Placing your order…",
 };
 
-const OTP_LENGTH = 6;
-// Same wait the backend enforces between two codes.
-const RESEND_COOLDOWN_SECONDS = 60;
-
 const linkButtonClass =
   "p-0 text-sm font-semibold text-(--color-primary) hover:text-(--color-primary-dark) disabled:cursor-not-allowed disabled:text-(--color-text-light)";
-
-const secondsLeft = (sentAt: number) =>
-  Math.max(
-    0,
-    RESEND_COOLDOWN_SECONDS - Math.floor((Date.now() - sentAt) / 1000),
-  );
 
 /**
  * The step between "Place Order" and the order itself for a customer who
@@ -68,17 +59,11 @@ export function OrderVerifyDialog({
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<"placing" | "resending" | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(() =>
-    secondsLeft(sentAt),
-  );
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((seconds) => Math.max(0, seconds - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  // When the current code went out — the one the dialog opened with, then
+  // each resent one: a new code can be asked for a minute later, and it
+  // stops working five minutes later.
+  const [codeSentAt, setCodeSentAt] = useState(sentAt);
+  const { resendIn, expiresIn } = useOtpCountdown(codeSentAt);
 
   // While open: Escape closes it, and the page behind doesn't scroll.
   useEffect(() => {
@@ -98,6 +83,10 @@ export function OrderVerifyDialog({
     if (busy) return;
     if (code.length < OTP_LENGTH) {
       setError(shared.otpIncomplete);
+      return;
+    }
+    if (expiresIn === 0) {
+      setError(shared.otpExpired);
       return;
     }
 
@@ -127,8 +116,9 @@ export function OrderVerifyDialog({
       setError(result.error);
       return;
     }
-    onResent(Date.now());
-    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    const now = Date.now();
+    setCodeSentAt(now);
+    onResent(now);
     toast.success(shared.otpResent);
   };
 
@@ -198,13 +188,15 @@ export function OrderVerifyDialog({
                 length={OTP_LENGTH}
                 invalid={Boolean(error)}
               />
-              {error && (
+              {error ? (
                 <p
                   role="alert"
                   className="mt-2 text-center text-sm text-(--color-error)"
                 >
                   {error}
                 </p>
+              ) : (
+                <OtpExpiryNote expiresIn={expiresIn} />
               )}
             </div>
 
@@ -237,12 +229,10 @@ export function OrderVerifyDialog({
               <button
                 type="button"
                 onClick={() => void resend()}
-                disabled={Boolean(busy) || resendCooldown > 0}
+                disabled={Boolean(busy) || resendIn > 0}
                 className={linkButtonClass}
               >
-                {resendCooldown > 0
-                  ? `${shared.otpResend} (${resendCooldown}s)`
-                  : shared.otpResend}
+                {shared.otpResend}
               </button>
             </div>
           </form>

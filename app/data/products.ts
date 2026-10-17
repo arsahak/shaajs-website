@@ -45,6 +45,11 @@ export interface Product {
    * added to the cart from its own page, where they're picked.
    */
   hasOptions?: boolean;
+  /**
+   * Marked Free Delivery in the dashboard. An order is delivered free only
+   * when every product in it is.
+   */
+  freeDelivery?: boolean;
   gradient: string;
   icon: LucideIcon;
 }

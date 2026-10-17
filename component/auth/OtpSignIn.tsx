@@ -5,13 +5,17 @@ import {
   verifySigninOtpAction,
 } from "@/app/actions/auth";
 import { fieldClass, submitClass } from "@/component/auth/authStyles";
-import { OtpInput } from "@/component/auth/OtpInput";
+import { OTP_LENGTH, OtpInput } from "@/component/auth/OtpInput";
+import {
+  formatCountdown,
+  useOtpCountdown,
+} from "@/component/auth/useOtpCountdown";
 import { easeSmooth } from "@/component/motion/variants";
 import { queueToast } from "@/component/providers/ToastProvider";
 import { AnimatePresence, motion } from "framer-motion";
-import { parsePhoneNumberFromString } from "libphonenumber-js/min";
+import { formatBdMobile, toBdMobile } from "@/app/utils/bd-mobile";
 import { ArrowRight, AtSign, Loader2, Phone } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 
 export type OtpSignInStep = "contact" | "otp";
@@ -30,6 +34,25 @@ interface OtpSignInProps {
   callbackUrl: string;
 }
 
+/**
+ * Under the code boxes: how long the code has left, then — once it has run
+ * out — that it has, in the error color.
+ */
+export function OtpExpiryNote({ expiresIn }: { expiresIn: number }) {
+  return expiresIn > 0 ? (
+    <p className="mt-2 text-center text-xs text-(--color-text-muted)">
+      {otpSignInCopy.otpExpiresIn}{" "}
+      <span className="font-semibold text-(--color-dark) tabular-nums">
+        {formatCountdown(expiresIn)}
+      </span>
+    </p>
+  ) : (
+    <p role="alert" className="mt-2 text-center text-xs text-(--color-error)">
+      {otpSignInCopy.otpExpired}
+    </p>
+  );
+}
+
 export const otpSignInCopy = {
   phone: {
     label: "Phone",
@@ -42,20 +65,19 @@ export const otpSignInCopy = {
   signIn: "Sign in",
   otpSending: "Sending code…",
   otpTitle: "Enter the code",
-  otpSubtitle: "We sent a 6-digit code to",
-  otpIncomplete: "Enter all 6 digits of the code.",
+  otpSubtitle: `We sent a ${OTP_LENGTH}-digit code to`,
+  otpIncomplete: `Enter all ${OTP_LENGTH} digits of the code.`,
   otpVerify: "Verify & continue",
   otpVerifying: "Verifying…",
   otpResend: "Resend code",
   otpResent: "A new code is on its way.",
+  otpExpiresIn: "Code expires in",
+  otpExpired: "This code has expired. Resend a new one.",
   otpChange: { phone: "Change number", email: "Change email" },
   signedIn: "Signed in successfully. Welcome to Shaajs!",
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const OTP_LENGTH = 6;
-// Same wait the backend enforces between two codes.
-const RESEND_COOLDOWN_SECONDS = 60;
 
 const linkButtonClass =
   "p-0 text-sm font-semibold text-(--color-primary) hover:text-(--color-primary-dark) disabled:cursor-not-allowed disabled:text-(--color-text-light)";
@@ -79,15 +101,10 @@ export function OtpSignIn({
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((seconds) => Math.max(0, seconds - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  // When the current code was sent: a new one can be asked for a minute
+  // later, and it stops working five minutes later.
+  const [sentAt, setSentAt] = useState<number | null>(null);
+  const { resendIn, expiresIn } = useOtpCountdown(sentAt);
 
   const sendCode = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -95,13 +112,13 @@ export function OtpSignIn({
     let sentTo: string;
     if (channel === "phone") {
       // Accepts 01XXXXXXXXX, 1XXXXXXXXX and +8801XXXXXXXXX alike.
-      const number = parsePhoneNumberFromString(contact, "BD");
-      if (!number?.isValid() || number.country !== "BD") {
+      const mobile = toBdMobile(contact);
+      if (!mobile) {
         setError(channelCopy.invalid);
         return;
       }
-      sendTo = number.number;
-      sentTo = number.formatInternational();
+      sendTo = mobile;
+      sentTo = formatBdMobile(mobile);
     } else {
       sendTo = contact.trim();
       sentTo = sendTo;
@@ -122,7 +139,7 @@ export function OtpSignIn({
 
     setIdentifier(result.identifier);
     setOtp("");
-    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    setSentAt(Date.now());
     onStepChange("otp", sentTo);
   };
 
@@ -130,6 +147,10 @@ export function OtpSignIn({
     event.preventDefault();
     if (otp.length < OTP_LENGTH) {
       setError(copy.otpIncomplete);
+      return;
+    }
+    if (expiresIn === 0) {
+      setError(copy.otpExpired);
       return;
     }
 
@@ -163,7 +184,7 @@ export function OtpSignIn({
       setError(result.error);
       return;
     }
-    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    setSentAt(Date.now());
     toast.success(copy.otpResent);
   };
 
@@ -283,10 +304,12 @@ export function OtpSignIn({
                 length={OTP_LENGTH}
                 invalid={Boolean(error)}
               />
-              {error && (
+              {error ? (
                 <p role="alert" className="mt-2 text-sm text-(--color-error)">
                   {error}
                 </p>
+              ) : (
+                <OtpExpiryNote expiresIn={expiresIn} />
               )}
             </div>
 
@@ -321,12 +344,10 @@ export function OtpSignIn({
               <button
                 type="button"
                 onClick={resend}
-                disabled={pending || resendCooldown > 0}
+                disabled={pending || resendIn > 0}
                 className={linkButtonClass}
               >
-                {resendCooldown > 0
-                  ? `${copy.otpResend} (${resendCooldown}s)`
-                  : copy.otpResend}
+                {copy.otpResend}
               </button>
             </div>
           </form>
