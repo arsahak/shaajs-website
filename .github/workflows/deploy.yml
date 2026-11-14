@@ -1,0 +1,31 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-website
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+    steps:
+      - name: Skip if VPS_DEPLOY_KEY secret is not set
+        if: env.DEPLOY_KEY == ''
+        run: echo "::warning::VPS_DEPLOY_KEY secret not set - skipping deploy"
+
+      - name: Deploy website
+        if: env.DEPLOY_KEY != ''
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "13.140.175.107 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHQGrWMfdoe2x0POicErwG4JEj4wXsjBKg9m3OSBSIbK" > ~/.ssh/known_hosts
+          # Server-side key only allows "deploy <app>" (see /var/www/shaajs-ecommerce/ci-deploy.sh)
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o ServerAliveInterval=30 deploy@13.140.175.107 "deploy website"
